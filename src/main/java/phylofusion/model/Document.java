@@ -32,7 +32,9 @@ import jloda.phylo.PhyloTree;
 public class Document {
 	private final ObservableList<PhyloTree> trees = FXCollections.observableArrayList();
 	private final ObservableList<PhyloTree> networks = FXCollections.observableArrayList();
+
 	private final BooleanProperty empty = new SimpleBooleanProperty(this, "empty", false);
+
 
 	public Document() {
 		empty.bind(Bindings.isEmpty(trees));

@@ -10,4 +10,7 @@ module phylofusion {
 
 	exports phylofusion.main;
 	opens phylofusion.window;
+	opens phylofusion.algorithm;
+	opens phylofusion.view;
+	opens phylofusion.utils;
 }

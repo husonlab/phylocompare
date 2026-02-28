@@ -63,13 +63,20 @@ public class ImportNewick {
 	public static Collection<PhyloTree> apply(BufferedReader r, MainWindow window) throws IOException {
 
 		var trees = new ArrayList<PhyloTree>();
+		var newickIO = new NewickIO();
+
 		while (r.ready()) {
 			var line = r.readLine();
 			if (line == null)
 				break;
 			if (!line.isBlank() && line.trim().startsWith("(")) {
 				var tree = new PhyloTree();
-				(new NewickIO()).parseBracketNotation(tree, line, true, false);
+				newickIO.setNewickNodeCommentConsumer((v, c) -> {
+					if (c.startsWith("&&NHX:GN="))
+						tree.setName(c.substring(c.indexOf("=") + 1));
+				});
+
+				newickIO.parseBracketNotation(tree, line, true, false);
 				trees.add(tree);
 				if (tree.getName() == null || tree.getName().isBlank())
 					tree.setName("%03d".formatted(trees.size()));

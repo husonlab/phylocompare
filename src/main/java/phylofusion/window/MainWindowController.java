@@ -28,16 +28,19 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import jloda.fx.control.ZoomableScrollPane;
+import jloda.fx.icons.MaterialIcons;
 import jloda.fx.util.ProgramProperties;
+import phylofusion.utils.BulkHeaderCheckBox;
 
 public class MainWindowController {
+	@FXML
+	private AnchorPane rootPane;
 
 	@FXML
 	private MenuItem aboutMenuItem;
-
-	@FXML
-	private MenuItem addLSAEdgeMenuItem;
 
 	@FXML
 	private AnchorPane bottomAnchorPane;
@@ -208,6 +211,9 @@ public class MainWindowController {
 	private MenuItem useNoneMenuItem;
 
 	@FXML
+	private MenuItem setConfidenceThresholdMenuItem;
+
+	@FXML
 	private MenuItem showAllMenuItem;
 
 	@FXML
@@ -236,12 +242,30 @@ public class MainWindowController {
 	private TextField confidenceTextField;
 
 	@FXML
-	private Label confidenceLabel;
+	private Label statusLabel;
+
+	@FXML
+	private SplitPane splitPane;
+
+	@FXML
+	private Button selectAllTableButton;
+
+	@FXML
+	private Button selectNoneTableButton;
+
+	@FXML
+	private Spinner<Double> outlineWidthSpinner;
+
+	private ZoomableScrollPane scrollPane;
 
 	private final BooleanProperty disableAllShow = new SimpleBooleanProperty(false);
 
 	@FXML
 	private void initialize() {
+		MaterialIcons.setIcon(runButton, MaterialIcons.play_circle);
+		MaterialIcons.setIcon(selectAllTableButton, MaterialIcons.select_all);
+		MaterialIcons.setIcon(selectNoneTableButton, MaterialIcons.deselect);
+
 		if (ProgramProperties.isMacOS()) {
 			getMenuBar().setUseSystemMenuBar(true);
 			fileMenu.getItems().remove(getQuitMenuItem());
@@ -249,15 +273,36 @@ public class MainWindowController {
 			//editMenu.getItems().remove(getPreferencesMenuItem());
 		}
 
-		confidenceLabel.setText("");
 		confidenceTextField.setTextFormatter(new TextFormatter<>(change ->
 				change.getControlNewText().matches("-?\\d*(\\.\\d*)?") ? change : null));
 		confidenceTextField.setText("0.0");
 		TableViewSupport.apply(treeTable, treeColumn, useColumn, showColumn, disableAllShow, this);
 
+		statusLabel.setText("");
+
 		runButton.setOnAction(e -> runMenuItem.fire());
 		runButton.disableProperty().bind(runMenuItem.disableProperty());
 
+		scrollPane = new ZoomableScrollPane(new Pane());
+		scrollPane.setFitToWidth(true);
+		scrollPane.setFitToHeight(true);
+		scrollPane.setPannable(true);
+		scrollPane.setLockAspectRatio(true);
+		scrollPane.setRequireShiftOrControlToZoom(true);
+
+		centerPane.getChildren().add(scrollPane);
+
+		useColumn.setCellValueFactory(cd -> cd.getValue().useProperty());
+		useColumn.setCellFactory(col -> new javafx.scene.control.cell.CheckBoxTableCell<>());
+
+		showColumn.setCellValueFactory(cd -> cd.getValue().showProperty());
+		showColumn.setCellFactory(col -> new javafx.scene.control.cell.CheckBoxTableCell<>());
+
+		useColumn.setGraphic(new BulkHeaderCheckBox<>(treeTable, TreeRow::useProperty).getNode());
+		showColumn.setGraphic(new BulkHeaderCheckBox<>(treeTable, TreeRow::showProperty).getNode());
+		var tip = new javafx.scene.control.Tooltip("Applies to selected rows; if none selected, applies to all rows.");
+		Tooltip.install(useColumn.getGraphic(), tip);
+		Tooltip.install(showColumn.getGraphic(), tip);
 	}
 
 	public BooleanProperty disableAllShowProperty() {
@@ -266,10 +311,6 @@ public class MainWindowController {
 
 	public MenuItem getAboutMenuItem() {
 		return aboutMenuItem;
-	}
-
-	public MenuItem getAddLSAEdgeMenuItem() {
-		return addLSAEdgeMenuItem;
 	}
 
 	public AnchorPane getBottomAnchorPane() {
@@ -532,7 +573,35 @@ public class MainWindowController {
 		return confidenceTextField;
 	}
 
-	public Label getConfidenceLabel() {
-		return confidenceLabel;
+	public Label getStatusLabel() {
+		return statusLabel;
+	}
+
+	public MenuItem getSetConfidenceThresholdMenuItem() {
+		return setConfidenceThresholdMenuItem;
+	}
+
+	public ZoomableScrollPane getScrollPane() {
+		return scrollPane;
+	}
+
+	public SplitPane getSplitPane() {
+		return splitPane;
+	}
+
+	public AnchorPane getRootPane() {
+		return rootPane;
+	}
+
+	public Button getSelectAllTableButton() {
+		return selectAllTableButton;
+	}
+
+	public Button getSelectNoneTableButton() {
+		return selectNoneTableButton;
+	}
+
+	public Spinner<Double> getOutlineWidthSpinner() {
+		return outlineWidthSpinner;
 	}
 }

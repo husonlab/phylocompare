@@ -1,5 +1,5 @@
 /*
- * NetworkView.java Copyright (C) 2026 Daniel H. Huson
+ * NetworkViewService.java Copyright (C) 2026 Daniel H. Huson
  *
  *  (Some files contain contributions from other authors, who are then mentioned separately.)
  *
@@ -18,11 +18,12 @@
  *
  */
 
-package phylofusion.window;
+package phylofusion.view;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Pane;
+import jloda.fx.util.AService;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
@@ -36,25 +37,35 @@ import splitstree6.layout.tree.TreeDiagramType;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NetworkView {
-	private final Pane pane;
-	private final Map<Node, LabeledNodeShape> nodeLabeledNodeShapeMap=new HashMap<>();
-	private final Map<Edge, LabeledEdgeShape> edgeLabeledEdgeShapeHashMap=new HashMap<>();
+public class NetworkViewService extends AService<ComputeTreeLayout.Result> {
+	private final Map<Node, LabeledNodeShape> nodeLabeledNodeShapeMap = new HashMap<>();
+	private final Map<Edge, LabeledEdgeShape> edgeLabeledEdgeShapeHashMap = new HashMap<>();
 
-	public NetworkView(Pane pane) {
-		this.pane=pane;
+	public NetworkViewService(Pane bottomPane) {
+		super(bottomPane);
 	}
 
-	public void update(TaxaBlock taxaBlock, PhyloTree network, TreeDiagramType diagram,
-					   Averaging averaging) {
-		var taxonLabelMap=new HashMap<Integer, StringProperty>();
-		for(var t=1;t<=taxaBlock.getNtax();t++) {
-			taxonLabelMap.put(t,new SimpleStringProperty(taxaBlock.getLabel(t)));
-		}
-		var width=Math.max(400,pane.getWidth()-50);
-		var height= Math.max(400,pane.getHeight()-50);
-		var alignLabels=true;
-		ComputeTreeLayout.apply(network, taxaBlock.getNtax(), taxonLabelMap::get,diagram,averaging,width,height,alignLabels,
-				nodeLabeledNodeShapeMap,edgeLabeledEdgeShapeHashMap,true);
+	public void setup(TaxaBlock taxaBlock, PhyloTree network, TreeDiagramType diagram,
+					  Averaging averaging, double width, double height) {
+		setCallable(() -> {
+			var taxonLabelMap = new HashMap<Integer, StringProperty>();
+			for (var t = 1; t <= taxaBlock.getNtax(); t++) {
+				taxonLabelMap.put(t, new SimpleStringProperty(taxaBlock.getLabel(t)));
+			}
+			var alignLabels = true;
+			nodeLabeledNodeShapeMap.clear();
+			edgeLabeledEdgeShapeHashMap.clear();
+			return ComputeTreeLayout.apply(network, taxaBlock.getNtax(), taxonLabelMap::get, diagram, averaging, width, height, alignLabels,
+					nodeLabeledNodeShapeMap, edgeLabeledEdgeShapeHashMap, true);
+		});
+		restart();
+	}
+
+	public Map<Node, LabeledNodeShape> getNodeLabeledNodeShapeMap() {
+		return nodeLabeledNodeShapeMap;
+	}
+
+	public Map<Edge, LabeledEdgeShape> getEdgeLabeledEdgeShapeHashMap() {
+		return edgeLabeledEdgeShapeHashMap;
 	}
 }
