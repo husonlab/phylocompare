@@ -101,7 +101,11 @@ public class MainWindow implements IMainWindow {
 		dirtyProperty().addListener(listener);
 
 		scene = new Scene(root);
+
+		scene.getStylesheets().add(Objects.requireNonNull(getClass().getClassLoader().getResource("jloda/fx/icons/button.css")).toExternalForm());
 		scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("MainWindow.css")).toExternalForm());
+		scene.getStylesheets().add(Objects.requireNonNull(getClass().getClassLoader().getResource("jloda/resources/css/white_pane.css")).toExternalForm());
+
 	}
 
 	@Override

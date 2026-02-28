@@ -55,6 +55,14 @@ public class PhyloFusionService extends AService<List<PhyloTree>> {
 			var resultBlock = new TreesBlock();
 			var algorithm = new PhyloFusion();
 			algorithm.compute(getProgressListener(), taxaBlock, treesBlock, resultBlock);
+			for (var network : resultBlock.getTrees()) {
+				if (network.getRoot().getOutDegree() > 1) {
+					var v = network.getRoot();
+					network.setRoot(network.newNode());
+					var e = network.newEdge(network.getRoot(), v);
+					network.setWeight(e, 0.00001);
+				}
+			}
 			return resultBlock.getTrees();
 		});
 	}

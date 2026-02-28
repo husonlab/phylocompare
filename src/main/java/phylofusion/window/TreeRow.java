@@ -1,5 +1,3 @@
-
-
 /*
  * TreeRow.java Copyright (C) 2026 Daniel H. Huson
  *
