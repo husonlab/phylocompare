@@ -27,6 +27,7 @@ import javafx.geometry.Point2D;
 import javafx.stage.Stage;
 import jloda.fx.util.ArgsOptions;
 import jloda.fx.util.ProgramProperties;
+import jloda.fx.util.ResourceManagerFX;
 import jloda.fx.window.MainWindowManager;
 import jloda.fx.window.NotificationManager;
 import jloda.fx.window.SplashScreen;
@@ -36,6 +37,7 @@ import jloda.util.Basic;
 import jloda.util.ProgramExecutorService;
 import jloda.util.UsageException;
 import phylofusion.window.MainWindow;
+import splitstree6.main.SplitsTree6;
 
 import java.io.File;
 import java.time.Duration;
@@ -57,6 +59,7 @@ public class PhyloFusion extends Application {
     public static void main(String[] args) {
         Basic.restoreSystemOut(System.err); // send system out to system err
         Basic.startCollectionStdErr();
+		ResourceManagerFX.addResourceRoot(SplitsTree6.class, "splitstree6.resources");
 
         if (false)
             ProgramProperties.getProgramIconsFX().setAll(Utils.getImage(PhyloFusion.class, "PhyloFusion-512x512.png"));

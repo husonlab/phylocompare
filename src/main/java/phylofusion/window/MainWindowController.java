@@ -26,10 +26,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import jloda.fx.control.ZoomableScrollPane;
 import jloda.fx.icons.MaterialIcons;
 import jloda.fx.util.ProgramProperties;
@@ -58,13 +55,13 @@ public class MainWindowController {
 	private MenuItem checkForUpdatesMenuItem;
 
 	@FXML
-	private RadioMenuItem circularLayoutMenuItem;
+	private RadioMenuItem rectangularCladogramMenuItem;
 
 	@FXML
-	private RadioMenuItem cladogramEarlyMenuItem;
+	private RadioMenuItem circularCladogramMenuItem;
 
 	@FXML
-	private RadioMenuItem cladogramLateMenuItem;
+	private RadioMenuItem radialCladogramMenuItem;
 
 	@FXML
 	private MenuItem clearMenuItem;
@@ -124,9 +121,6 @@ public class MainWindowController {
 	private Menu layoutMenu;
 
 	@FXML
-	private MenuItem layoutPhylogenyMenuItem;
-
-	@FXML
 	private Label memoryUsageLabel;
 
 	@FXML
@@ -145,22 +139,13 @@ public class MainWindowController {
 	private MenuItem pasteMenuItem;
 
 	@FXML
-	private RadioMenuItem phylogramMenuItem;
-
-	@FXML
 	private MenuItem printMenuItem;
 
 	@FXML
 	private MenuItem quitMenuItem;
 
 	@FXML
-	private RadioMenuItem radialLayoutMenuItem;
-
-	@FXML
 	private Menu recentFilesMenu;
-
-	@FXML
-	private RadioMenuItem rectangularLayoutMenuItem;
 
 	@FXML
 	private MenuItem redoMenuItem;
@@ -196,7 +181,7 @@ public class MainWindowController {
 	private TableColumn<TreeRow, String> treeColumn;
 
 	@FXML
-	private TableColumn<TreeRow, Boolean> useColumn;
+	private TableColumn<TreeRow, Boolean> runColumn;
 
 	@FXML
 	private TableColumn<TreeRow, Boolean> showColumn;
@@ -218,7 +203,6 @@ public class MainWindowController {
 
 	@FXML
 	private MenuItem showNoneMenuItem;
-
 
 	@FXML
 	private MenuItem undoMenuItem;
@@ -254,7 +238,25 @@ public class MainWindowController {
 	private Button selectNoneTableButton;
 
 	@FXML
+	private MenuButton diagramMenuButton;
+
+	@FXML
 	private Spinner<Double> outlineWidthSpinner;
+
+	@FXML
+	private Button showButton;
+
+	@FXML
+	private VBox legendVBox;
+
+	@FXML
+	private MenuButton exportMenuButton;
+
+	@FXML
+	private Button zoomInButton;
+
+	@FXML
+	private Button zoomOutButton;
 
 	private ZoomableScrollPane scrollPane;
 
@@ -262,9 +264,13 @@ public class MainWindowController {
 
 	@FXML
 	private void initialize() {
-		MaterialIcons.setIcon(runButton, MaterialIcons.play_circle);
+		MaterialIcons.setIcon(runButton, MaterialIcons.play_circle, "", false);
+		MaterialIcons.setIcon(showButton, MaterialIcons.play_circle, "", false);
 		MaterialIcons.setIcon(selectAllTableButton, MaterialIcons.select_all);
 		MaterialIcons.setIcon(selectNoneTableButton, MaterialIcons.deselect);
+		MaterialIcons.setIcon(exportMenuButton, MaterialIcons.ios_share);
+		MaterialIcons.setIcon(zoomInButton, MaterialIcons.zoom_in);
+		MaterialIcons.setIcon(zoomOutButton, MaterialIcons.zoom_out);
 
 		if (ProgramProperties.isMacOS()) {
 			getMenuBar().setUseSystemMenuBar(true);
@@ -276,7 +282,7 @@ public class MainWindowController {
 		confidenceTextField.setTextFormatter(new TextFormatter<>(change ->
 				change.getControlNewText().matches("-?\\d*(\\.\\d*)?") ? change : null));
 		confidenceTextField.setText("0.0");
-		TableViewSupport.apply(treeTable, treeColumn, useColumn, showColumn, disableAllShow, this);
+		TableViewSupport.apply(treeTable, treeColumn, runColumn, showColumn, disableAllShow, this);
 
 		statusLabel.setText("");
 
@@ -292,17 +298,22 @@ public class MainWindowController {
 
 		centerPane.getChildren().add(scrollPane);
 
-		useColumn.setCellValueFactory(cd -> cd.getValue().useProperty());
-		useColumn.setCellFactory(col -> new javafx.scene.control.cell.CheckBoxTableCell<>());
+		runColumn.setCellValueFactory(cd -> cd.getValue().runProperty());
+		runColumn.setCellFactory(col -> new javafx.scene.control.cell.CheckBoxTableCell<>());
 
 		showColumn.setCellValueFactory(cd -> cd.getValue().showProperty());
 		showColumn.setCellFactory(col -> new javafx.scene.control.cell.CheckBoxTableCell<>());
 
-		useColumn.setGraphic(new BulkHeaderCheckBox<>(treeTable, TreeRow::useProperty).getNode());
+		runColumn.setGraphic(new BulkHeaderCheckBox<>(treeTable, TreeRow::runProperty).getNode());
 		showColumn.setGraphic(new BulkHeaderCheckBox<>(treeTable, TreeRow::showProperty).getNode());
 		var tip = new javafx.scene.control.Tooltip("Applies to selected rows; if none selected, applies to all rows.");
-		Tooltip.install(useColumn.getGraphic(), tip);
+		Tooltip.install(runColumn.getGraphic(), tip);
 		Tooltip.install(showColumn.getGraphic(), tip);
+
+		zoomInButton.setOnAction(e -> zoomInMenuItem.fire());
+		zoomInButton.disableProperty().bind(zoomInMenuItem.disableProperty());
+		zoomOutButton.setOnAction(e -> zoomOutMenuItem.fire());
+		zoomOutButton.disableProperty().bind(zoomOutMenuItem.disableProperty());
 	}
 
 	public BooleanProperty disableAllShowProperty() {
@@ -333,17 +344,6 @@ public class MainWindowController {
 		return checkForUpdatesMenuItem;
 	}
 
-	public RadioMenuItem getCircularLayoutMenuItem() {
-		return circularLayoutMenuItem;
-	}
-
-	public RadioMenuItem getCladogramEarlyMenuItem() {
-		return cladogramEarlyMenuItem;
-	}
-
-	public RadioMenuItem getCladogramLateMenuItem() {
-		return cladogramLateMenuItem;
-	}
 
 	public MenuItem getClearMenuItem() {
 		return clearMenuItem;
@@ -421,10 +421,6 @@ public class MainWindowController {
 		return layoutMenu;
 	}
 
-	public MenuItem getLayoutPhylogenyMenuItem() {
-		return layoutPhylogenyMenuItem;
-	}
-
 	public Label getMemoryUsageLabel() {
 		return memoryUsageLabel;
 	}
@@ -449,9 +445,6 @@ public class MainWindowController {
 		return pasteMenuItem;
 	}
 
-	public RadioMenuItem getPhylogramMenuItem() {
-		return phylogramMenuItem;
-	}
 
 	public MenuItem getPrintMenuItem() {
 		return printMenuItem;
@@ -461,16 +454,8 @@ public class MainWindowController {
 		return quitMenuItem;
 	}
 
-	public RadioMenuItem getRadialLayoutMenuItem() {
-		return radialLayoutMenuItem;
-	}
-
 	public Menu getRecentFilesMenu() {
 		return recentFilesMenu;
-	}
-
-	public RadioMenuItem getRectangularLayoutMenuItem() {
-		return rectangularLayoutMenuItem;
 	}
 
 	public MenuItem getRedoMenuItem() {
@@ -517,8 +502,8 @@ public class MainWindowController {
 		return treeColumn;
 	}
 
-	public TableColumn<TreeRow, Boolean> getUseColumn() {
-		return useColumn;
+	public TableColumn<TreeRow, Boolean> getRunColumn() {
+		return runColumn;
 	}
 
 	public TableColumn<TreeRow, Boolean> getShowColumn() {
@@ -603,5 +588,33 @@ public class MainWindowController {
 
 	public Spinner<Double> getOutlineWidthSpinner() {
 		return outlineWidthSpinner;
+	}
+
+	public Button getShowButton() {
+		return showButton;
+	}
+
+	public MenuButton getDiagramMenuButton() {
+		return diagramMenuButton;
+	}
+
+	public RadioMenuItem getRectangularCladogramMenuItem() {
+		return rectangularCladogramMenuItem;
+	}
+
+	public RadioMenuItem getCircularCladogramMenuItem() {
+		return circularCladogramMenuItem;
+	}
+
+	public RadioMenuItem getRadialCladogramMenuItem() {
+		return radialCladogramMenuItem;
+	}
+
+	public VBox getLegendVBox() {
+		return legendVBox;
+	}
+
+	public MenuButton getExportMenuButton() {
+		return exportMenuButton;
 	}
 }

@@ -28,13 +28,15 @@ import jloda.phylo.PhyloTree;
 
 public class TreeRow {
 	private final StringProperty name = new SimpleStringProperty();
-	private final BooleanProperty use = new SimpleBooleanProperty(false);
+	private final int id;
+	private final BooleanProperty run = new SimpleBooleanProperty(false);
 	private final BooleanProperty show = new SimpleBooleanProperty(false);
 	private final PhyloTree tree;
 
-	public TreeRow(String name, boolean use, boolean show, PhyloTree tree) {
+	public TreeRow(String name, int id, boolean run, boolean show, PhyloTree tree) {
 		setName(name);
-		setUse(use);
+		this.id = id;
+		setRun(run);
 		setShow(show);
 		this.tree = tree;
 	}
@@ -51,16 +53,16 @@ public class TreeRow {
 		name.set(v);
 	}
 
-	public BooleanProperty useProperty() {
-		return use;
+	public BooleanProperty runProperty() {
+		return run;
 	}
 
-	public boolean isUse() {
-		return use.get();
+	public boolean isRun() {
+		return run.get();
 	}
 
-	public void setUse(boolean v) {
-		use.set(v);
+	public void setRun(boolean v) {
+		run.set(v);
 	}
 
 	public BooleanProperty showProperty() {
@@ -77,5 +79,9 @@ public class TreeRow {
 
 	public PhyloTree getTree() {
 		return tree;
+	}
+
+	public int getId() {
+		return id;
 	}
 }

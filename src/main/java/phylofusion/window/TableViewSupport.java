@@ -24,23 +24,18 @@ package phylofusion.window;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyIntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import jloda.fx.util.BasicFX;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class TableViewSupport {
 
 	public static void apply(TableView<TreeRow> treeTableView,
-							 TableColumn<TreeRow, String> treeColumn, TableColumn<TreeRow, Boolean> useColumn,
+							 TableColumn<TreeRow, String> treeColumn, TableColumn<TreeRow, Boolean> runColumn,
 							 TableColumn<TreeRow, Boolean> showColumn, BooleanProperty disableAllShow,
 							 MainWindowController controller) {
 		treeTableView.setEditable(true);
@@ -50,9 +45,9 @@ public class TableViewSupport {
 		treeColumn.setCellValueFactory(cd -> cd.getValue().nameProperty());
 
 		// Use checkbox
-		useColumn.setEditable(true);
-		useColumn.setCellValueFactory(cd -> cd.getValue().useProperty());
-		useColumn.setCellFactory(col -> {
+		runColumn.setEditable(true);
+		runColumn.setCellValueFactory(cd -> cd.getValue().runProperty());
+		runColumn.setCellFactory(col -> {
 			var cell = new CheckBoxTableCell<TreeRow, Boolean>();
 			cell.setEditable(true);
 			return cell;
@@ -97,39 +92,5 @@ public class TableViewSupport {
 
 			return row;
 		});
-	}
-
-	public static ReadOnlyIntegerProperty setupCountActive(TableView<TreeRow> treeTableView) {
-		var countActive = new SimpleIntegerProperty(0);
-		var rowListenerMap = new HashMap<TreeRow, ChangeListener<Boolean>>();
-		treeTableView.getItems().addListener((ListChangeListener<TreeRow>) c -> {
-			while (c.next()) {
-				if (c.wasAdded()) {
-					for (var row : c.getAddedSubList()) {
-						ChangeListener<Boolean> listener = (v, o, n) -> {
-							if (n)
-								countActive.set(countActive.get() + 1);
-							else {
-								countActive.set(countActive.get() - 1);
-							}
-						};
-						row.useProperty().addListener(listener);
-						rowListenerMap.put(row, listener);
-						if (row.isUse())
-							countActive.set(countActive.get() + 1);
-					}
-					if (c.wasRemoved()) {
-						for (var row : c.getRemoved()) {
-							row.useProperty().removeListener(rowListenerMap.get(row));
-							rowListenerMap.remove(row);
-							if (row.isUse()) {
-								countActive.set(countActive.get() - 1);
-							}
-						}
-					}
-				}
-			}
-		});
-		return countActive;
 	}
 }

@@ -55,8 +55,10 @@ public class NetworkViewService extends AService<ComputeTreeLayout.Result> {
 			var alignLabels = true;
 			nodeLabeledNodeShapeMap.clear();
 			edgeLabeledEdgeShapeHashMap.clear();
+
 			return ComputeTreeLayout.apply(network, taxaBlock.getNtax(), taxonLabelMap::get, diagram, averaging, width, height, alignLabels,
 					nodeLabeledNodeShapeMap, edgeLabeledEdgeShapeHashMap, true);
+
 		});
 		restart();
 	}

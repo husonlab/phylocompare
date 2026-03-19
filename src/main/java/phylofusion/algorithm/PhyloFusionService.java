@@ -24,15 +24,11 @@ package phylofusion.algorithm;
 import javafx.scene.layout.Pane;
 import jloda.fx.util.AService;
 import jloda.phylo.PhyloTree;
-import jloda.util.IteratorUtils;
+import phylofusion.utils.NexusBlocksUtils;
 import splitstree6.algorithms.trees.trees2trees.PhyloFusion;
-import splitstree6.algorithms.trees.trees2trees.TreesEdgesFilter;
-import splitstree6.data.TaxaBlock;
 import splitstree6.data.TreesBlock;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.TreeSet;
 
 
 public class PhyloFusionService extends AService<List<PhyloTree>> {
@@ -40,21 +36,17 @@ public class PhyloFusionService extends AService<List<PhyloTree>> {
 		super(progressPane);
 	}
 
-	public void setupCalculation(Collection<PhyloTree> phyloTrees, double minConfidence) {
+	public void setupCalculation(List<PhyloTree> trees0, double minConfidence) {
 		setCallable(() -> {
-			var taxaBlock = new TaxaBlock();
-			var treesBlock = new TreesBlock();
-			setupBlocks(phyloTrees, taxaBlock, treesBlock);
-			if (minConfidence > 0.0) {
-				var workingTrees = new TreesBlock();
-				var algorithm = new TreesEdgesFilter();
-				algorithm.setOptionMinConfidence(minConfidence);
-				algorithm.compute(getProgressListener(), taxaBlock, treesBlock, workingTrees);
-				treesBlock = workingTrees;
-			}
+			final List<PhyloTree> trees;
+			if (minConfidence > 0.0)
+				trees = FilterTrees.apply(trees0, minConfidence, getProgressListener());
+			else
+				trees = trees0;
+			var blocks = NexusBlocksUtils.setupBlocks(trees);
 			var resultBlock = new TreesBlock();
 			var algorithm = new PhyloFusion();
-			algorithm.compute(getProgressListener(), taxaBlock, treesBlock, resultBlock);
+			algorithm.compute(getProgressListener(), blocks.taxaBlock(), blocks.treesBlock(), resultBlock);
 			for (var network : resultBlock.getTrees()) {
 				if (network.getRoot().getOutDegree() > 1) {
 					var v = network.getRoot();
@@ -65,28 +57,5 @@ public class PhyloFusionService extends AService<List<PhyloTree>> {
 			}
 			return resultBlock.getTrees();
 		});
-	}
-
-	private void setupBlocks(Collection<PhyloTree> phyloTrees, TaxaBlock taxaBlock, TreesBlock treesBlock) {
-		var names = new TreeSet<String>();
-		for (var tree : phyloTrees) {
-			names.addAll(tree.nodeStream().filter(v -> v.isLeaf() && tree.getLabel(v) != null && !tree.getLabel(v).isBlank()).map(tree::getLabel).toList());
-		}
-		taxaBlock.addTaxaByNames(names);
-		var partial = false;
-
-		for (var tree : phyloTrees) {
-			for (var v : tree.nodes()) {
-				if (v.isLeaf() && tree.getLabel(v) != null && !tree.getLabel(v).isBlank())
-					tree.addTaxon(v, taxaBlock.indexOf(tree.getLabel(v)));
-			}
-			if (!partial && IteratorUtils.size(tree.getTaxa()) < taxaBlock.getNtax())
-				partial = true;
-
-		}
-		treesBlock.setRooted(true);
-		treesBlock.setPartial(true);
-		treesBlock.setReticulated(false);
-		treesBlock.getTrees().addAll(phyloTrees);
 	}
 }
