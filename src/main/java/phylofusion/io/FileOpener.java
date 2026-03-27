@@ -58,7 +58,7 @@ public class FileOpener implements Consumer<String> {
 					if (parameters.confidenceThreshold() >= 0)
 						window.getDocument().confidenceThresholdProperty().set(parameters.confidenceThreshold());
 					if (parameters.outlineWidth() > 0)
-						window.getPresenter().optionOutlineWidthProperty().set(parameters.outlineWidth());
+						window.getPresenter().getNetworkView().optionOutlineWidthProperty().set(parameters.outlineWidth());
 				}
 			} else {
 				var firstLine = Objects.requireNonNull(FileUtils.getFirstLineFromFile(new File(fileName))).trim().toLowerCase();

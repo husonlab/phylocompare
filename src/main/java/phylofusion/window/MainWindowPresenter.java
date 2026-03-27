@@ -22,7 +22,7 @@ package phylofusion.window;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -40,6 +40,7 @@ import jloda.util.NumberUtils;
 import jloda.util.StringUtils;
 import phylofusion.algorithm.AlgorithmsService;
 import phylofusion.io.ExportNewick;
+import phylofusion.io.ImportNewick;
 import phylofusion.io.Save;
 import phylofusion.io.SaveBeforeClosingDialog;
 import phylofusion.utils.DoubleSpinnerBinder;
@@ -47,18 +48,22 @@ import phylofusion.utils.SplitPaneSupport;
 import phylofusion.view.NetworkView;
 import splitstree6.layout.tree.TreeDiagramType;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class MainWindowPresenter {
 	private final MainWindow window;
 	private final Runnable updateNetworkDrawing;
 	private final Runnable updateTreesDrawing;
-	private final DoubleProperty optionOutlineWidth = new SimpleDoubleProperty(this, "optionOutlineWidth", 30.0);
 
 	private final AlgorithmsService algorithmsService;
 	private final NetworkView networkView;
+
 
 	public MainWindowPresenter(MainWindow window) {
 		this.window = window;
@@ -87,8 +92,7 @@ public class MainWindowPresenter {
 		controller.getConfidenceTextField().disableProperty().bind(canRun.not());
 		confidenceThreshold.addListener(e -> controller.getRunMenuItem().fire());
 
-		ProgramProperties.track(optionOutlineWidth, 30.0);
-		networkView = new NetworkView(controller.getBottomFlowPane(), controller.getLegendVBox(), optionOutlineWidth);
+		networkView = new NetworkView(controller.getBottomFlowPane(), controller.getLegendVBox());
 
 		updateNetworkDrawing = () -> RunAfterAWhile.applyInFXThread("updateNetworkDrawing", () -> {
 			if (document.getNetworks().isEmpty())
@@ -118,14 +122,16 @@ public class MainWindowPresenter {
 		});
 
 		controller.getRunMenuItem().setOnAction(e -> {
-			this.window.getUndoManager().clear();
-			algorithmsService.setupCalculation(this.window, true, true);
-			algorithmsService.setOnScheduled(a -> networkView.clear());
-			algorithmsService.setOnSucceeded(a -> {
-				updateNetworkDrawing();
-				window.dirtyProperty().set(true);
-			});
-			algorithmsService.restart();
+			if (!algorithmsService.isRunning()) {
+				this.window.getUndoManager().clear();
+				algorithmsService.setupCalculation(this.window, true, true);
+				algorithmsService.setOnScheduled(a -> networkView.clear());
+				algorithmsService.setOnSucceeded(a -> {
+					updateNetworkDrawing();
+					window.dirtyProperty().set(true);
+				});
+				algorithmsService.restart();
+			}
 		});
 		controller.getRunMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreesProperty().not()));
 
@@ -144,12 +150,24 @@ public class MainWindowPresenter {
 			updateNetworkDrawing();
 			undoManager.add("diagram", networkView.optionDiagramProperty(), o, n);
 		});
+		networkView.optionShowOutlineProperty().addListener((v, o, n) -> {
+			undoManager.add("outline", networkView.optionShowOutlineProperty(), o, n);
+		});
+		networkView.optionShowOutlineProperty().bindBidirectional(controller.getOutlineCBox().selectedProperty());
+		controller.getOutlineCBox().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
-		controller.getCenterPane().widthProperty().addListener(e -> updateNetworkDrawing());
-		controller.getCenterPane().heightProperty().addListener(e -> updateNetworkDrawing());
+		networkView.optionReticulateEdgesAreSpecialProperty().bindBidirectional(controller.getReticulateEdgesAreSpecialCheckMenuItem().selectedProperty());
+		networkView.optionReticulateEdgesAreSpecialProperty().addListener((v, o, n) -> {
+			if (document.hasNetworks())
+				updateNetworkDrawing();
+		});
+
+		window.getStage().widthProperty().addListener(e -> updateNetworkDrawing());
+		window.getStage().heightProperty().addListener(e -> updateNetworkDrawing());
 
 		var stackPane = new StackPane(networkView);
 		stackPane.setPadding(new Insets(25));
+
 		networkView.targetWidthProperty().bind(controller.getCenterPane().widthProperty());
 		networkView.targetHeightProperty().bind(controller.getCenterPane().heightProperty());
 		controller.getScrollPane().setContent(stackPane);
@@ -169,8 +187,8 @@ public class MainWindowPresenter {
 		controller.getNewMenuItem().setOnAction(e -> NewWindow.apply());
 		controller.getOpenMenuItem().setOnAction(FileOpenManager.createOpenFileEventHandler(window.getStage()));
 
-		controller.disableAllRunProperty().bind(document.hasTreesProperty().not());
-		controller.disableAllShowProperty().bind(document.hasTreeRecordsProperty().not());
+		controller.disableAllRunProperty().bind(document.hasTreesProperty().not().or(algorithmsService.runningProperty()));
+		controller.disableAllShowProperty().bind(document.hasTreeRecordsProperty().not().or(algorithmsService.runningProperty()));
 
 		RecentFilesManager.getInstance().setFileOpener(FileOpenManager.getFileOpener());
 		RecentFilesManager.getInstance().setupMenu(controller.getRecentFilesMenu());
@@ -192,7 +210,7 @@ public class MainWindowPresenter {
 				}
 			});
 		});
-		controller.getShowAllMenuItem().disableProperty().bind(document.hasTreeRecordsProperty().not());
+		controller.getShowAllMenuItem().disableProperty().bind(document.hasTreeRecordsProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getShowNoneMenuItem().setOnAction(e -> {
 			var showing = document.getShowTrees();
@@ -206,7 +224,7 @@ public class MainWindowPresenter {
 				}
 			});
 		});
-		controller.getShowNoneMenuItem().disableProperty().bind(document.hasTreeRecordsProperty().not());
+		controller.getShowNoneMenuItem().disableProperty().bind(document.hasTreeRecordsProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getQuitMenuItem().setOnAction((e) -> {
 			while (MainWindowManager.getInstance().size() > 0) {
@@ -250,7 +268,7 @@ public class MainWindowPresenter {
 			else
 				document.getTreeRecords().forEach(row -> row.setRun(true));
 		});
-		controller.getUseAllMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreeRecordsProperty().not()));
+		controller.getUseAllMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreeRecordsProperty().not()).or(algorithmsService.runningProperty()));
 
 		controller.getUseNoneMenuItem().setOnAction(e -> {
 			var selected = controller.getTreeTable().getSelectionModel().getSelectedItems();
@@ -260,7 +278,7 @@ public class MainWindowPresenter {
 			else
 				document.getTreeRecords().forEach(row -> row.setRun(false));
 		});
-		controller.getUseNoneMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreeRecordsProperty().not()));
+		controller.getUseNoneMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreeRecordsProperty().not()).or(algorithmsService.runningProperty()));
 
 		controller.getSetConfidenceThresholdMenuItem().setOnAction(e -> {
 			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Confidence", "Enter min edge confidence", "0.0", s -> {
@@ -268,34 +286,47 @@ public class MainWindowPresenter {
 			});
 			dialog.show();
 		});
-		controller.getSetConfidenceThresholdMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreesProperty().not()));
+		controller.getSetConfidenceThresholdMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreesProperty().not()).or(algorithmsService.runningProperty()));
 
 		SplitPaneSupport.installKeepLeftSameDuringWindowResize(controller.getRootPane(), controller.getSplitPane());
 
 		controller.getSelectAllTableButton().setOnAction(e -> {
 			controller.getTreeTable().getSelectionModel().selectAll();
 		});
-		controller.getSelectAllTableButton().disableProperty().bind(document.hasTreeRecordsProperty().not());
+		controller.getSelectAllTableButton().disableProperty().bind(document.hasTreeRecordsProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getSelectNoneTableButton().setOnAction(e -> {
 			controller.getTreeTable().getSelectionModel().clearSelection();
 		});
-		controller.getSelectNoneTableButton().disableProperty().bind(document.hasTreeRecordsProperty().not());
+		controller.getSelectNoneTableButton().disableProperty().bind(document.hasTreeRecordsProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getShowSelectedMenuItem().setOnAction(e -> {
+			if (!controller.getTreeTable().getSelectionModel().getSelectedItems().isEmpty()) {
+				var selected = controller.getTreeTable().getSelectionModel().getSelectedItems();
+				for (var record : document.getTreeRecords()) {
+					record.setShow(selected.contains(record));
+				}
+			}
 			updateTreesDrawing();
 			updateStatusLine.invalidated(null);
 			window.dirtyProperty().set(true);
 		});
 		controller.getShowSelectedMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(networkView.runningProperty()).or(algorithmsService.runningProperty()).or(document.hasTreeRecordsProperty().not()));
 
+		controller.getShowButton().setOnAction(e -> {
+			updateTreesDrawing();
+			updateStatusLine.invalidated(null);
+			window.dirtyProperty().set(true);
+		});
+		controller.getShowButton().disableProperty().bind(controller.getShowSelectedMenuItem().disableProperty());
+
 		{
 			controller.getRectangularCladogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.RectangularCladogram));
-			controller.getRectangularCladogramMenuItem().disableProperty().bind(document.hasNetworksProperty().not());
+			controller.getRectangularCladogramMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 			controller.getCircularCladogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.CircularCladogram));
-			controller.getCircularCladogramMenuItem().disableProperty().bind(document.hasNetworksProperty().not());
+			controller.getCircularCladogramMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 			controller.getRadialCladogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.RadialCladogram));
-			controller.getRadialCladogramMenuItem().disableProperty().bind(document.hasNetworksProperty().not());
+			controller.getRadialCladogramMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
 			var menuButton = controller.getDiagramMenuButton();
 			menuButton.setPrefWidth(50);
@@ -320,7 +351,7 @@ public class MainWindowPresenter {
 			});
 			if (networkView.getOptionDiagram() != null)
 				menuButton.setGraphic(networkView.getOptionDiagram().icon());
-			menuButton.disableProperty().bind(document.hasNetworksProperty().not());
+			menuButton.disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 		}
 
 		controller.getCloseMenuItem().setOnAction(e -> {
@@ -370,7 +401,7 @@ public class MainWindowPresenter {
 				controller.getScrollPane().setVbarPolicy(vPolicy);
 			}
 		});
-		controller.getCopyImageMenuItem().disableProperty().bind(document.hasNetworksProperty().not());
+		controller.getCopyImageMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getExportImageMenuItem().setOnAction(e -> {
 			var hPolicy = controller.getScrollPane().getHbarPolicy();
@@ -384,28 +415,67 @@ public class MainWindowPresenter {
 				controller.getScrollPane().setVbarPolicy(vPolicy);
 			}
 		});
-		controller.getExportImageMenuItem().disableProperty().bind(document.hasNetworksProperty().not());
+		controller.getExportImageMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getExportNewickMenuItem().setOnAction(e -> ExportNewick.apply(window));
-		controller.getExportNewickMenuItem().disableProperty().bind(document.hasNetworksProperty().not());
+		controller.getExportNewickMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getSaveMenuItem().setOnAction(e -> Save.showSaveDialog(this.window));
-		controller.getSaveMenuItem().disableProperty().bind(document.emptyProperty());
+		controller.getSaveMenuItem().disableProperty().bind(document.emptyProperty().or(algorithmsService.runningProperty()));
 
 		controller.getUndoMenuItem().setOnAction(e -> undoManager.undo());
 		controller.getUndoMenuItem().textProperty().bind(undoManager.undoNameProperty());
-		controller.getUndoMenuItem().disableProperty().bind(undoManager.undoableProperty().not());
+		controller.getUndoMenuItem().disableProperty().bind(undoManager.undoableProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getRedoMenuItem().setOnAction(e -> undoManager.redo());
 		controller.getRedoMenuItem().textProperty().bind(undoManager.redoNameProperty());
-		controller.getRedoMenuItem().disableProperty().bind(undoManager.redoableProperty().not());
+		controller.getRedoMenuItem().disableProperty().bind(undoManager.redoableProperty().not().or(algorithmsService.runningProperty()));
+
+		controller.getCopyMenuItem().setOnAction(e -> {
+			try {
+				if (document.hasNetworks())
+					ClipboardUtils.putString(ExportNewick.apply(document.getNetwork()));
+				else if (document.hasTreesProperty().get()) {
+					var trees = getSelectedRowsOrAll(controller.getTreeTable(), document.getTreeRecords()).stream().map(TreeRecord::getTree).filter(Objects::nonNull).toList();
+					if (!trees.isEmpty())
+						ClipboardUtils.putString(ExportNewick.apply(trees));
+				}
+			} catch (IOException ex) {
+				System.err.println(ex.getMessage());
+			}
+		});
+		controller.getCopyMenuItem().disableProperty().bind(document.emptyProperty().or(algorithmsService.runningProperty()));
+
+		controller.getClearMenuItem().setOnAction(e -> {
+			networkView.clear();
+			document.getNetworks().clear();
+		});
+		controller.getClearMenuItem().disableProperty().bind((document.hasTreesProperty().and(document.hasNetworksProperty()).not()));
+
+		var canEditTreesList = new SimpleBooleanProperty(this, "canEditTreesList", false);
+		canEditTreesList.bind(document.hasTreesProperty().and(document.hasNetworksProperty().not()).or(algorithmsService.runningProperty().not()));
+
+		controller.getPasteMenuItem().setOnAction(e -> {
+			if (ClipboardUtils.hasString()) {
+				try {
+					document.addTrees(ImportNewick.apply(new BufferedReader(new StringReader(ClipboardUtils.getString()))));
+				} catch (IOException ignored) {
+				}
+			}
+		});
+		controller.getPasteMenuItem().disableProperty().bind(canEditTreesList.not().and(document.emptyProperty().not()));
+
+		controller.getDeleteMenuItem().setOnAction(e -> document.getTreeRecords().removeAll(getSelectedRowsOrAll(controller.getTreeTable(), document.getTreeRecords())));
+		controller.getDeleteMenuItem().disableProperty().bind(canEditTreesList.not());
+
+		WindowMenuSetup.setup(controller.getWindowMenu(), window.fileNameProperty());
 	}
 
 	public static Collection<TreeRecord> getSelectedRowsOrAll(TableView<TreeRecord> treeTableView, List<TreeRecord> treeRecords) {
 		if (treeTableView.getSelectionModel().getSelectedItems().isEmpty()) {
-			return treeTableView.getItems();
-		} else {
 			return treeRecords;
+		} else {
+			return treeTableView.getSelectionModel().getSelectedItems();
 		}
 	}
 
@@ -414,19 +484,17 @@ public class MainWindowPresenter {
 	}
 
 	public void updateTreesDrawing() {
-		algorithmsService.setupCalculation(window, false, true);
-		algorithmsService.setOnSucceeded(a -> {
-			updateTreesDrawing.run();
-			window.dirtyProperty().set(true);
-		});
-		algorithmsService.restart();
+		if (!algorithmsService.isRunning()) {
+			algorithmsService.setupCalculation(window, false, true);
+			algorithmsService.setOnSucceeded(a -> {
+				updateTreesDrawing.run();
+				window.dirtyProperty().set(true);
+			});
+			algorithmsService.restart();
+		}
 	}
 
-	public double getOptionOutlineWidth() {
-		return optionOutlineWidth.get();
-	}
-
-	public DoubleProperty optionOutlineWidthProperty() {
-		return optionOutlineWidth;
+	public NetworkView getNetworkView() {
+		return networkView;
 	}
 }

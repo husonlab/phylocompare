@@ -31,7 +31,8 @@ import phylofusion.window.MainWindow;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.io.StringWriter;
+import java.util.Collection;
 
 /**
  * save in Newick format
@@ -51,11 +52,8 @@ public class ExportNewick {
 		fileChooser.getExtensionFilters().addAll(ExtensionFilters.newick(), ExtensionFilters.createText());
 		var file = fileChooser.showSaveDialog(mainWindow.getStage());
 		if (file != null) {
-			var newickIO = new NewickIO();
-			newickIO.setNewickNodeCommentSupplier(CommentData.createDataNodeSupplier());
-			newickIO.setNewickEdgeCommentSupplier(CommentData.createDataEdgeSupplier());
-			try {
-				apply(file.getPath(), mainWindow.getDocument().getNetworks());
+			try (var w = FileUtils.getOutputWriterPossiblyZIPorGZIP(file.getPath())) {
+				w.write(apply(mainWindow.getDocument().getNetwork()));
 				ProgramProperties.put("NewickExport", file.getPath());
 			} catch (IOException ex) {
 				NotificationManager.showError("Export failed: " + ex);
@@ -63,16 +61,20 @@ public class ExportNewick {
 		}
 	}
 
-	public static void apply(String filename, List<PhyloTree> networks) throws IOException {
+	public static String apply(Collection<PhyloTree> trees) throws IOException {
+		return apply(trees.toArray(new PhyloTree[0]));
+	}
+
+	public static String apply(PhyloTree... trees) throws IOException {
 		var newickIO = new NewickIO();
 		newickIO.setNewickNodeCommentSupplier(CommentData.createDataNodeSupplier());
 		newickIO.setNewickEdgeCommentSupplier(CommentData.createDataEdgeSupplier());
-		try (var w = FileUtils.getOutputWriterPossiblyZIPorGZIP(filename)) {
-			for (var network : networks) {
-				newickIO.write(network, w, false, false);
-				w.write(";\n");
-			}
+		var w = new StringWriter();
+		for (var tree : trees) {
+			newickIO.write(tree, w, true, false);
+			w.write(";\n");
 		}
+		return w.toString();
 	}
 }
 

@@ -24,14 +24,13 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Text;
 import jloda.fx.util.ColorSchemeManager;
+import jloda.fx.util.ColorUtilsFX;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.PhyloTree;
@@ -70,8 +69,7 @@ public class DrawTracedTrees {
 			group.getChildren().add(treeGroup);
 
 			var label = new ToggleButton();
-			label.setTextFill(color);
-			label.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
+			label.setStyle("-fx-text-fill: " + ColorUtilsFX.toStringCSS(color) + "; -fx-background-color: transparent; -fx-border-color: transparent;");
 			label.setText(idRecordMap.containsKey(treeId) ? idRecordMap.get(treeId).getName() : "???");
 			legend.getChildren().add(new HBox(new Text(" "), label));
 

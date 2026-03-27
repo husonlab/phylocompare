@@ -73,10 +73,12 @@ public class AlgorithmsService extends AService<Boolean> {
 			} else {
 				networks.addAll(document.getNetworks());
 			}
+			if (progress.isUserCancelled())
+				return false;
 			if (runBruteForceTraceTrees && document.hasTreesProperty().get()) {
+				getProgressListener().setTasks("Tree tracing", "");
 				for (var network : networks) {
-					BruteForceTreeTracer.apply(network, document.getTreeRecords(), document.getConfidenceThreshold());
-					getProgressListener().setTasks("Tree tracing", "");
+					BruteForceTreeTracer.apply(network, document.getTreeRecords(), document.getConfidenceThreshold(), progress);
 				}
 			}
 			Platform.runLater(() -> document.getNetworks().setAll(networks));

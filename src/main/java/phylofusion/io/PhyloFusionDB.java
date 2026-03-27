@@ -42,7 +42,7 @@ public class PhyloFusionDB {
 	public static void save(String fileName,
 							List<TreeRecord> treeRecords,
 							List<PhyloTree> networks,
-							double minConfidence, double outlineWidth) throws IOException {
+							double minConfidence, double outlineWidth, boolean showOutline) throws IOException {
 		String url = "jdbc:sqlite:" + fileName;
 
 		try (var conn = DriverManager.getConnection(url)) {
@@ -117,15 +117,21 @@ public class PhyloFusionDB {
 
 				try (var ps = conn.prepareStatement("INSERT INTO parameters (name, type, value) VALUES (?, ?, ?)")) {
 					{
-						ps.setString(1, "minConfidence");
+						ps.setString(1, "min_confidence");
 						ps.setString(2, "double");
 						ps.setString(3, StringUtils.removeTrailingZerosAfterDot(minConfidence));
 						ps.addBatch();
 					}
 					{
-						ps.setString(1, "outlineWidth");
+						ps.setString(1, "outline_width");
 						ps.setString(2, "double");
 						ps.setString(3, StringUtils.removeTrailingZerosAfterDot(outlineWidth));
+						ps.addBatch();
+					}
+					{
+						ps.setString(1, "show_outline");
+						ps.setString(2, "boolean");
+						ps.setString(3, showOutline ? "true" : "false");
 						ps.addBatch();
 					}
 					ps.executeBatch();
@@ -208,19 +214,24 @@ public class PhyloFusionDB {
 			try (var rs = stmt.executeQuery("SELECT name, type, value FROM parameters ORDER BY name")) {
 				var confidenceThreshold = -1.0;
 				var outlineWidth = -1.0;
+				var showOutline = true;
 				while (rs.next()) {
 					var name = rs.getString("name");
 					var type = rs.getString("type");
 					var value = rs.getString("value");
 					if (type.equals("double") && NumberUtils.isDouble(value)) {
-						if (name.equals("confidenceThreshold")) {
+						if (name.equals("confidence_threshold")) {
 							confidenceThreshold = Double.parseDouble(value);
-						} else if (name.equals("outlineWidth")) {
+						} else if (name.equals("outline_width")) {
 							outlineWidth = Double.parseDouble(value);
+						}
+					} else if (type.equals("boolean") && NumberUtils.isBoolean(value)) {
+						if (name.equals("show_outline")) {
+							showOutline = NumberUtils.parseBoolean(value);
 						}
 					}
 				}
-				result = new Parameters(confidenceThreshold, outlineWidth);
+				result = new Parameters(confidenceThreshold, outlineWidth, showOutline);
 			}
 			if (!treeRecords.isEmpty())
 				document.addTreesAndNetworks(treeRecords, networks.values());
@@ -244,6 +255,6 @@ public class PhyloFusionDB {
 		}
 	}
 
-	public record Parameters(double confidenceThreshold, double outlineWidth) {
+	public record Parameters(double confidenceThreshold, double outlineWidth, boolean showOutline) {
 	}
 }

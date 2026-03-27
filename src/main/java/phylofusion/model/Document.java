@@ -25,7 +25,6 @@ package phylofusion.model;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import jloda.fx.util.BasicFX;
@@ -73,15 +72,14 @@ public class Document {
 	}
 
 	public void addTrees(List<PhyloTree> trees) {
-		for (var i = 0; i < trees.size(); i++) {
-			var id = (i + 1);
-			var tree = trees.get(i);
-			var name = tree.getName();
-			if (name == null || name.isBlank()) {
-				name = "tree-" + id;
-				tree.setName(name);
+		var nextId = treeRecords.stream().mapToInt(TreeRecord::getId).max().orElse(0) + 1;
+		for (var tree : trees) {
+			if (tree.nodeStream().noneMatch(v -> v.getInDegree() > 1)) {
+				if (tree.getName() == null || tree.getName().isBlank())
+					tree.setName("T%03d".formatted(nextId));
+				treeRecords.add(new TreeRecord(tree.getName(), nextId, true, true, tree));
+				nextId++;
 			}
-			treeRecords.add(new TreeRecord(name, id, true, true, tree));
 		}
 		addTaxa(treeRecords.stream().map(TreeRecord::getTree).toList());
 	}
@@ -187,7 +185,7 @@ public class Document {
 		return hasNetworks;
 	}
 
-	public ObservableValue<Boolean> emptyProperty() {
+	public BooleanProperty emptyProperty() {
 		return empty;
 	}
 
@@ -205,5 +203,11 @@ public class Document {
 
 	public BitSet getShowTrees() {
 		return BitSetUtils.asBitSet(treeRecords.stream().filter(TreeRecord::isShow).mapToInt(TreeRecord::getId).filter(Objects::nonNull).toArray());
+	}
+
+	public PhyloTree getNetwork() {
+		if (networks.isEmpty())
+			return null;
+		else return networks.get(0);
 	}
 }

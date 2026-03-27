@@ -32,6 +32,7 @@ import jloda.fx.icons.MaterialIcons;
 import jloda.fx.util.BasicFX;
 import jloda.fx.util.DraggableUtils;
 import jloda.fx.util.ProgramProperties;
+import jloda.fx.window.MainWindowManager;
 import phylofusion.utils.BulkHeaderCheckBox;
 
 import java.util.List;
@@ -250,6 +251,12 @@ public class MainWindowController {
 	@FXML
 	private AnchorPane innerAnchorPane;
 
+	@FXML
+	private CheckBox outlineCBox;
+
+	@FXML
+	private CheckMenuItem reticulateEdgesAreSpecialCheckMenuItem;
+
 	private ZoomableScrollPane scrollPane;
 
 	private final BooleanProperty disableAllShow = new SimpleBooleanProperty(false);
@@ -314,13 +321,24 @@ public class MainWindowController {
 
 		DraggableUtils.makeDraggableInAnchorPane(legendVBox);
 
-		exportMenuButton.getItems().addAll(BasicFX.copyMenu(List.of(copyImageMenuItem), false));
+		exportMenuButton.getItems().addAll(BasicFX.copyMenu(List.of(copyMenuItem, copyImageMenuItem), false));
 
 		runButton.onActionProperty().bindBidirectional(runMenuItem.onActionProperty());
 		runButton.disableProperty().bindBidirectional(runMenuItem.disableProperty());
 
-		showButton.onActionProperty().bindBidirectional(showSelectedMenuItem.onActionProperty());
-		showButton.disableProperty().bind(showSelectedMenuItem.disableProperty());
+		ProgramProperties.track(outlineCBox.selectedProperty(), true);
+
+		MainWindowManager.useDarkThemeProperty().addListener((v, o, n) -> {
+			if (n)
+				scrollPane.setStyle("-fx-background: black;-fx-background-color: black;");
+			else
+				scrollPane.setStyle("-fx-background: white;-fx-background-color: white;");
+		});
+		if (MainWindowManager.useDarkThemeProperty().get())
+			scrollPane.setStyle("-fx-background: black;-fx-background-color: black;");
+		else
+			scrollPane.setStyle("-fx-background: white;-fx-background-color: white;");
+
 	}
 
 	public BooleanProperty disableAllRunProperty() {
@@ -603,5 +621,17 @@ public class MainWindowController {
 
 	public AnchorPane getInnerAnchorPane() {
 		return innerAnchorPane;
+	}
+
+	public CheckBox getOutlineCBox() {
+		return outlineCBox;
+	}
+
+	public Button getShowButton() {
+		return showButton;
+	}
+
+	public CheckMenuItem getReticulateEdgesAreSpecialCheckMenuItem() {
+		return reticulateEdgesAreSpecialCheckMenuItem;
 	}
 }

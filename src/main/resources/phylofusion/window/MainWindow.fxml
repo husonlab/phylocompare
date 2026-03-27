@@ -107,8 +107,16 @@
                                         <ToolBar minHeight="30.0" BorderPane.alignment="CENTER">
                                             <items>
                                                 <MenuButton fx:id="diagramMenuButton" text="Diagram"/>
-                                                <Label text="Width:"/>
-                                                <Spinner fx:id="outlineWidthSpinner" editable="true" prefWidth="80.0"/>
+                                                <CheckBox fx:id="outlineCBox" mnemonicParsing="false" text="Outline">
+                                                    <tooltip>
+                                                        <Tooltip text="Draw network outline"/>
+                                                    </tooltip>
+                                                </CheckBox>
+                                                <Spinner fx:id="outlineWidthSpinner" editable="true" prefWidth="60.0">
+                                                    <tooltip>
+                                                        <Tooltip text="Set outline width"/>
+                                                    </tooltip>
+                                                </Spinner>
                                                 <Button fx:id="zoomInButton" mnemonicParsing="false" text="Zoom In"/>
                                                 <Button fx:id="zoomOutButton" layoutX="221.0" layoutY="10.0"
                                                         mnemonicParsing="false" text="Zoom Out"/>
@@ -288,14 +296,14 @@
                                         <SeparatorMenuItem mnemonicParsing="false"/>
                                         <MenuItem fx:id="increaseFontSizeMenuItem" text="Increase Font Size">
                                             <accelerator>
-                                                <KeyCodeCombination alt="UP" code="ADD" control="UP" meta="UP"
-                                                                    shift="UP" shortcut="DOWN"/>
+                                                <KeyCodeCombination alt="UP" code="UP" control="UP" meta="UP"
+                                                                    shift="DOWN" shortcut="DOWN"/>
                                             </accelerator>
                                         </MenuItem>
                                         <MenuItem fx:id="decreaseFontSizeMenuItem" text="Decrease Font Size">
                                             <accelerator>
-                                                <KeyCodeCombination alt="UP" code="MINUS" control="UP" meta="UP"
-                                                                    shift="UP" shortcut="DOWN"/>
+                                                <KeyCodeCombination alt="UP" code="DOWN" control="UP" meta="UP"
+                                                                    shift="DOWN" shortcut="DOWN"/>
                                             </accelerator>
                                         </MenuItem>
                                         <SeparatorMenuItem mnemonicParsing="false"/>
@@ -326,6 +334,9 @@
                                             <RadioMenuItem fx:id="radialCladogramMenuItem" mnemonicParsing="false"
                                                            text="Radial Cladogram"/>
                                         </Menu>
+                                        <CheckMenuItem fx:id="reticulateEdgesAreSpecialCheckMenuItem"
+                                                       mnemonicParsing="false" text="Reticulate Edges Are Special"
+                                                       selected="true"/>
                                     </items>
                                 </Menu>
                                 <Menu fx:id="windowMenu" mnemonicParsing="false" text="Window">

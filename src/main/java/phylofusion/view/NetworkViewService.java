@@ -46,7 +46,7 @@ public class NetworkViewService extends AService<ComputeTreeLayout.Result> {
 	}
 
 	public void setup(TaxaBlock taxaBlock, PhyloTree network, TreeDiagramType diagram,
-					  Averaging averaging, double width, double height) {
+					  Averaging averaging, double width, double height, boolean reticulateEdgesAreSpecial) {
 		setCallable(() -> {
 			getProgressListener().setTasks("Computing", "layout");
 			var taxonLabelMap = new HashMap<Integer, StringProperty>();
@@ -58,7 +58,7 @@ public class NetworkViewService extends AService<ComputeTreeLayout.Result> {
 			edgeLabeledEdgeShapeHashMap.clear();
 
 			return ComputeTreeLayout.apply(network, taxaBlock.getNtax(), taxonLabelMap::get, diagram, averaging, width, height, alignLabels,
-					nodeLabeledNodeShapeMap, edgeLabeledEdgeShapeHashMap, true);
+					nodeLabeledNodeShapeMap, edgeLabeledEdgeShapeHashMap, true, reticulateEdgesAreSpecial);
 		});
 		restart();
 	}

@@ -40,8 +40,10 @@ public class Save {
 	 */
 	public static void apply(File file, MainWindow window) {
 		try {
-			PhyloFusionDB.save(file.getPath(), window.getDocument().getTreeRecords(), window.getDocument().getNetworks(),
-					window.getDocument().getConfidenceThreshold(), window.getPresenter().getOptionOutlineWidth());
+			var document = window.getDocument();
+			var networkView = window.getPresenter().getNetworkView();
+			PhyloFusionDB.save(file.getPath(), document.getTreeRecords(), document.getNetworks(),
+					document.getConfidenceThreshold(), networkView.getOptionOutlineWidth(), networkView.isOptionShowOutline());
 			window.dirtyProperty().set(false);
 		} catch (IOException e) {
 			WindowNotifications.showError(window.getController().getCenterPane(), "Save failed: " + e.getMessage());

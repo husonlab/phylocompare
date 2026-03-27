@@ -35,6 +35,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.StrokeLineCap;
 import jloda.fx.util.BasicFX;
+import jloda.fx.util.ProgramProperties;
 import jloda.fx.window.MainWindowManager;
 import jloda.graph.Edge;
 import jloda.graph.Node;
@@ -65,7 +66,16 @@ public class NetworkView extends Group {
 
 	private final ObjectProperty<TreeDiagramType> optionDiagram = new SimpleObjectProperty<>(this, "optionDiagram", TreeDiagramType.RectangularCladogram);
 	private final ObjectProperty<Averaging> optionAveraging = new SimpleObjectProperty<>(this, "optionAveraging", Averaging.ChildAverage);
-	private final DoubleProperty optionOutlineWidth;
+	private final DoubleProperty optionOutlineWidth = new SimpleDoubleProperty(this, "optionOutlineWidth", 30.0);
+	private final BooleanProperty optionShowOutline = new SimpleBooleanProperty(this, "optionShowOutline", true);
+
+	private final BooleanProperty optionRectangularEdges = new SimpleBooleanProperty(this, "optionRectangularEdges", false);
+	private final BooleanProperty optionReticulateEdgesAreSpecial = new SimpleBooleanProperty(this, "optionReticulateEdgesAreSpecial", true);
+
+	{
+		ProgramProperties.track(optionOutlineWidth, 30.0);
+	}
+
 
 	private final DoubleProperty targetWidth = new SimpleDoubleProperty(this, "targetWidth", 800.0);
 	private final DoubleProperty targetHeight = new SimpleDoubleProperty(this, "targetHeight", 800.0);
@@ -73,17 +83,23 @@ public class NetworkView extends Group {
 	static int countDrawNetworks = 0;
 	static int countDrawTrees = 0;
 
-	public NetworkView(Pane bottomPane, VBox legend, DoubleProperty optionOutlineWidth) {
+	public NetworkView(Pane bottomPane, VBox legend) {
 		this.service = new NetworkViewService(bottomPane);
 		this.legend = legend;
-		this.optionOutlineWidth = optionOutlineWidth;
-		outlinesGroup.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, MainWindowManager.isUseDarkTheme() ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0));
+
+		optionShowOutline.addListener((v, o, n) -> {
+			outlinesGroup.setEffect(n ? new DropShadow(BlurType.THREE_PASS_BOX, MainWindowManager.isUseDarkTheme() ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0) : null);
+		});
+		outlinesGroup.setEffect(optionShowOutline.get() ? new DropShadow(BlurType.THREE_PASS_BOX, MainWindowManager.isUseDarkTheme() ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0) : null);
+
 		MainWindowManager.useDarkThemeProperty().addListener((v, o, n) -> {
-			outlinesGroup.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, n ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0));
+			if (optionShowOutline.get())
+				outlinesGroup.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, n ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0));
 			for (var shape : BasicFX.getAllRecursively(outlinesGroup, Path.class)) {
 				shape.setStroke(n ? Color.WHITE : Color.BLACK);
 			}
 		});
+
 		getChildren().addAll(networkGroup, tracedTreesGroup);
 	}
 
@@ -108,7 +124,7 @@ public class NetworkView extends Group {
 
 			var width = scaleFactor * Math.max(400, getTargetWidth() - 200);
 			var height = scaleFactor * Math.max(400, getTargetHeight() - 50);
-			service.setup(taxaBlock, network, getOptionDiagram(), getOptionAveraging(), width, height);
+			service.setup(taxaBlock, network, getOptionDiagram(), getOptionAveraging(), width, height, optionReticulateEdgesAreSpecial.get());
 			service.setOnSucceeded(a -> {
 				System.err.println("Draw Network " + (++countDrawNetworks));
 				var result = service.getValue();
@@ -208,6 +224,14 @@ public class NetworkView extends Group {
 		return optionOutlineWidth;
 	}
 
+	public boolean isOptionShowOutline() {
+		return optionShowOutline.get();
+	}
+
+	public BooleanProperty optionShowOutlineProperty() {
+		return optionShowOutline;
+	}
+
 	public double getTargetWidth() {
 		return targetWidth.get();
 	}
@@ -226,6 +250,14 @@ public class NetworkView extends Group {
 
 	public ReadOnlyBooleanProperty runningProperty() {
 		return service.runningProperty();
+	}
+
+	public BooleanProperty optionRectangularEdgesProperty() {
+		return optionRectangularEdges;
+	}
+
+	public BooleanProperty optionReticulateEdgesAreSpecialProperty() {
+		return optionReticulateEdgesAreSpecial;
 	}
 }
 

@@ -32,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * newick import
@@ -60,7 +61,37 @@ public class ImportNewick {
 	 * @throws IOException
 	 */
 	public static Collection<PhyloTree> apply(BufferedReader r, MainWindow window) throws IOException {
+		var phylogenies = apply(r);
+		var areTrees = phylogenies.stream().noneMatch(t -> t.nodeStream().anyMatch(v -> v.getInDegree() > 1));
+		var document = window.getDocument();
+		document.clear();
+		if (areTrees) {
+			for (var tree : phylogenies) {
+				if (tree.getName() == null || tree.getName().isBlank())
+					tree.setName("T%03d".formatted(phylogenies.size()));
+			}
+			document.addTrees(phylogenies);
+			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d trees".formatted(phylogenies.size())));
+		} else {
+			for (var tree : phylogenies) {
+				if (tree.getName() == null || tree.getName().isBlank())
+					tree.setName("N%03d".formatted(phylogenies.size()));
+			}
+			document.addNetworks(phylogenies);
+			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d networks".formatted(phylogenies.size())));
+			Platform.runLater(() -> window.getPresenter().updateNetworkDrawing());
+		}
+		return phylogenies;
+	}
 
+	/**
+	 * import from a buffered reader
+	 *
+	 * @param r reader
+	 * @return set of new nodes
+	 * @throws IOException
+	 */
+	public static List<PhyloTree> apply(BufferedReader r) throws IOException {
 		var phylogenies = new ArrayList<PhyloTree>();
 		var newickIO = new NewickIO();
 		newickIO.setNewickNodeCommentConsumer(CommentData.createDataNodeConsumer());
@@ -74,21 +105,7 @@ public class ImportNewick {
 				var tree = new PhyloTree();
 				newickIO.parseBracketNotation(tree, line, true, false);
 				phylogenies.add(tree);
-				if (tree.getName() == null || tree.getName().isBlank())
-					tree.setName("%03d".formatted(phylogenies.size()));
 			}
-
-		}
-		var areTrees = phylogenies.stream().noneMatch(t -> t.nodeStream().anyMatch(v -> v.getInDegree() > 1));
-		var document = window.getDocument();
-		document.clear();
-		if (areTrees) {
-			document.addTrees(phylogenies);
-			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d trees".formatted(phylogenies.size())));
-		} else {
-			document.addNetworks(phylogenies);
-			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d networks".formatted(phylogenies.size())));
-			Platform.runLater(() -> window.getPresenter().updateNetworkDrawing());
 		}
 		return phylogenies;
 	}

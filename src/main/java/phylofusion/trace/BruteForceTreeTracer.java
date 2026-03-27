@@ -26,6 +26,7 @@ import jloda.graph.Node;
 import jloda.graph.NodeArray;
 import jloda.phylo.PhyloTree;
 import jloda.util.*;
+import jloda.util.progress.ProgressListener;
 import jloda.util.progress.ProgressSilent;
 import phylofusion.algorithm.FilterTrees;
 import phylofusion.utils.NexusBlocksUtils;
@@ -51,7 +52,7 @@ public class BruteForceTreeTracer {
 	 * @param network  the rooted network
 	 * @param treeRecords the tree rows
 	 */
-	public static void apply(PhyloTree network, List<TreeRecord> treeRecords, double minConfidence) {
+	public static void apply(PhyloTree network, List<TreeRecord> treeRecords, double minConfidence, ProgressListener progress) {
 		var requireComputation = new ArrayList<TreeRecord>();
 
 		var set = getTT(network.getRoot());
@@ -82,11 +83,12 @@ public class BruteForceTreeTracer {
 			try {
 				ExecuteInParallel.apply(choices, choice -> {
 					traceTrees(network, choice, requireComputation, minConfidence);
-				}, ProgramExecutorService.getNumberOfCoresToUse());
+				}, ProgramExecutorService.getNumberOfCoresToUse(), progress);
+				CompleteTreeTrace.apply(network);
+			} catch (InterruptedException ignored) {
 			} catch (Exception e) {
 				Basic.caught(e);
 			}
-			CompleteTreeTrace.apply(network);
 		}
 	}
 
