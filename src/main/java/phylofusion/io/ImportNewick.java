@@ -31,7 +31,6 @@ import phylofusion.window.MainWindow;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -57,10 +56,9 @@ public class ImportNewick {
 	 *
 	 * @param r      reader
 	 * @param window window
-	 * @return set of new nodes
 	 * @throws IOException
 	 */
-	public static Collection<PhyloTree> apply(BufferedReader r, MainWindow window) throws IOException {
+	public static void apply(BufferedReader r, MainWindow window) throws IOException {
 		var phylogenies = apply(r);
 		var areTrees = phylogenies.stream().noneMatch(t -> t.nodeStream().anyMatch(v -> v.getInDegree() > 1));
 		var document = window.getDocument();
@@ -81,7 +79,6 @@ public class ImportNewick {
 			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d networks".formatted(phylogenies.size())));
 			Platform.runLater(() -> window.getPresenter().updateNetworkDrawing());
 		}
-		return phylogenies;
 	}
 
 	/**
@@ -105,6 +102,11 @@ public class ImportNewick {
 				var tree = new PhyloTree();
 				newickIO.parseBracketNotation(tree, line, true, false);
 				phylogenies.add(tree);
+
+				for (var e : tree.edges()) {
+					if (e.getTarget().getInDegree() > 1)
+						System.err.println(e + ": " + e.getData());
+				}
 			}
 		}
 		return phylogenies;

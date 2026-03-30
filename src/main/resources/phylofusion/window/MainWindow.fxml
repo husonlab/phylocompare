@@ -126,6 +126,12 @@
                                 </BorderPane>
                                 <MenuButton fx:id="exportMenuButton" mnemonicParsing="false" text="Export"
                                             AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                                    <items>
+                                        <MenuItem fx:id="copyTreesMenuItem" mnemonicParsing="false" text="Copy Trees"/>
+                                        <MenuItem fx:id="copyNetworkMenuItem" mnemonicParsing="false"
+                                                  text="Copy Network"/>
+                                        <SeparatorMenuItem mnemonicParsing="false"/>
+                                    </items>
                                 </MenuButton>
                             </children>
                         </AnchorPane>
@@ -335,8 +341,8 @@
                                                            text="Radial Cladogram"/>
                                         </Menu>
                                         <CheckMenuItem fx:id="reticulateEdgesAreSpecialCheckMenuItem"
-                                                       mnemonicParsing="false" text="Reticulate Edges Are Special"
-                                                       selected="true"/>
+                                                       mnemonicParsing="false" selected="true"
+                                                       text="Reticulate Edges Are Special"/>
                                     </items>
                                 </Menu>
                                 <Menu fx:id="windowMenu" mnemonicParsing="false" text="Window">

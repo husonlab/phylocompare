@@ -52,7 +52,7 @@ public class DrawTracedTrees {
 		legend.getChildren().setAll(legend.getChildren().get(0));
 		var group = new Group();
 
-		var colorScheme = ColorSchemeManager.getInstance().getColorScheme("Retro29");
+		var colorScheme = ColorSchemeManager.getInstance().getColorScheme("Twenty");
 
 		var idRecordMap = new HashMap<Integer, TreeRecord>();
 		for (var record : treeRecords) {
@@ -107,7 +107,6 @@ public class DrawTracedTrees {
 				}
 				var edgeSet = getTT(e);
 				if (edgeSet != null) {
-					// System.err.println(e + ": " + edgeSet);
 					use.and(edgeSet);
 				}
 

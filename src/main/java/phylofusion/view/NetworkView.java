@@ -80,9 +80,6 @@ public class NetworkView extends Group {
 	private final DoubleProperty targetWidth = new SimpleDoubleProperty(this, "targetWidth", 800.0);
 	private final DoubleProperty targetHeight = new SimpleDoubleProperty(this, "targetHeight", 800.0);
 
-	static int countDrawNetworks = 0;
-	static int countDrawTrees = 0;
-
 	public NetworkView(Pane bottomPane, VBox legend) {
 		this.service = new NetworkViewService(bottomPane);
 		this.legend = legend;
@@ -126,7 +123,6 @@ public class NetworkView extends Group {
 			var height = scaleFactor * Math.max(400, getTargetHeight() - 50);
 			service.setup(taxaBlock, network, getOptionDiagram(), getOptionAveraging(), width, height, optionReticulateEdgesAreSpecial.get());
 			service.setOnSucceeded(a -> {
-				System.err.println("Draw Network " + (++countDrawNetworks));
 				var result = service.getValue();
 				networkGroup.getChildren().setAll(result.getAllAsGroup());
 				networkGroup.getChildren().add(outlinesGroup);
@@ -141,13 +137,11 @@ public class NetworkView extends Group {
 
 				if (updateTreesDrawing) {
 					clearTracedTreesDrawing();
-					System.err.println("Draw Trees " + (++countDrawTrees));
 					drawTracedTrees(network, treeRecords);
 				}
 			});
 		} else if (updateTreesDrawing) {
 			clearTracedTreesDrawing();
-			System.err.println("Draw Trees " + (++countDrawTrees));
 			drawTracedTrees(network, treeRecords);
 		}
 	}

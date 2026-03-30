@@ -96,8 +96,9 @@ public class Document {
 				}
 			}
 			for (var e : network.edges()) {
-				if (e.getTarget().getInDegree() > 1 && TreeTrace.getTT(e) == null)
+				if (e.getTarget().getInDegree() > 1 && TreeTrace.getTT(e) == null) {
 					throw new IOException("Network has reticulate edge without tree trace annotation: " + e);
+				}
 			}
 		}
 
@@ -175,6 +176,10 @@ public class Document {
 
 	public ReadOnlyBooleanProperty hasTreesProperty() {
 		return hasTrees;
+	}
+
+	public boolean hasTrees() {
+		return hasTreeRecords.get();
 	}
 
 	public boolean hasNetworks() {

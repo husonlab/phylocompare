@@ -32,9 +32,9 @@ public class TreeTrace {
 
 	public static BitSet getTT(Object nodeOrEdge) {
 		if (nodeOrEdge instanceof Node v && v.getData() instanceof CommentData data) {
-			return data.getIntSetValue(KEY).orElse(null);
+			return data.getIntSetValue(KEY).orElse(data.hasKey(KEY) ? new BitSet() : null);
 		} else if (nodeOrEdge instanceof Edge e && e.getData() instanceof CommentData data) {
-			return data.getIntSetValue(KEY).orElse(null);
+			return data.getIntSetValue(KEY).orElse(data.hasKey(KEY) ? new BitSet() : null);
 		} else return null;
 	}
 

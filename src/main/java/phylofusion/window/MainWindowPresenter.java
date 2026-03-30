@@ -35,6 +35,7 @@ import jloda.fx.util.*;
 import jloda.fx.window.MainWindowManager;
 import jloda.fx.window.SplashScreen;
 import jloda.fx.window.WindowGeometry;
+import jloda.fx.windownotifications.WindowNotifications;
 import jloda.phylo.algorithms.RootedNetworkProperties;
 import jloda.util.NumberUtils;
 import jloda.util.StringUtils;
@@ -431,20 +432,40 @@ public class MainWindowPresenter {
 		controller.getRedoMenuItem().textProperty().bind(undoManager.redoNameProperty());
 		controller.getRedoMenuItem().disableProperty().bind(undoManager.redoableProperty().not().or(algorithmsService.runningProperty()));
 
-		controller.getCopyMenuItem().setOnAction(e -> {
-			try {
-				if (document.hasNetworks())
-					ClipboardUtils.putString(ExportNewick.apply(document.getNetwork()));
-				else if (document.hasTreesProperty().get()) {
-					var trees = getSelectedRowsOrAll(controller.getTreeTable(), document.getTreeRecords()).stream().map(TreeRecord::getTree).filter(Objects::nonNull).toList();
-					if (!trees.isEmpty())
+		controller.getCopyTreesMenuItem().setOnAction(e -> {
+			if (document.hasTrees()) {
+				var trees = getSelectedRowsOrAll(controller.getTreeTable(), document.getTreeRecords()).stream().map(TreeRecord::getTree).filter(Objects::nonNull).toList();
+				if (!trees.isEmpty()) {
+					try {
 						ClipboardUtils.putString(ExportNewick.apply(trees));
+					} catch (IOException ex) {
+						System.err.println(ex.getMessage());
+					}
 				}
-			} catch (IOException ex) {
-				System.err.println(ex.getMessage());
 			}
 		});
-		controller.getCopyMenuItem().disableProperty().bind(document.emptyProperty().or(algorithmsService.runningProperty()));
+		controller.getCopyTreesMenuItem().disableProperty().bind(document.hasTreesProperty().not().or(algorithmsService.runningProperty()));
+
+
+		controller.getCopyNetworkMenuItem().setOnAction(e -> {
+			if (document.hasNetworks()) {
+				try {
+					ClipboardUtils.putString(ExportNewick.apply(document.getNetwork()));
+				} catch (IOException ex) {
+					System.err.println(ex.getMessage());
+				}
+			}
+		});
+		controller.getCopyNetworkMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
+
+		controller.getCopyMenuItem().setOnAction(e -> {
+			if (controller.getScrollPane().isFocused() && document.hasNetworks())
+				controller.getCopyNetworkMenuItem().fire();
+			else if (document.hasTrees()) {
+				controller.getCopyTreesMenuItem().fire();
+			}
+		});
+		controller.getCopyMenuItem().disableProperty().bind(controller.getCopyTreesMenuItem().disableProperty().and(controller.getCopyNetworkMenuItem().disableProperty()));
 
 		controller.getClearMenuItem().setOnAction(e -> {
 			networkView.clear();
@@ -458,8 +479,9 @@ public class MainWindowPresenter {
 		controller.getPasteMenuItem().setOnAction(e -> {
 			if (ClipboardUtils.hasString()) {
 				try {
-					document.addTrees(ImportNewick.apply(new BufferedReader(new StringReader(ClipboardUtils.getString()))));
-				} catch (IOException ignored) {
+					ImportNewick.apply(new BufferedReader(new StringReader(ClipboardUtils.getString())), window);
+				} catch (IOException ex) {
+					WindowNotifications.showWarning(controller.getCenterPane(), "Paste failed: " + ex.getMessage());
 				}
 			}
 		});

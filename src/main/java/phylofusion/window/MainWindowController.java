@@ -81,6 +81,12 @@ public class MainWindowController {
 	private MenuItem copyMenuItem;
 
 	@FXML
+	private MenuItem copyTreesMenuItem;
+
+	@FXML
+	private MenuItem copyNetworkMenuItem;
+
+	@FXML
 	private MenuItem cutMenuItem;
 
 	@FXML
@@ -321,7 +327,7 @@ public class MainWindowController {
 
 		DraggableUtils.makeDraggableInAnchorPane(legendVBox);
 
-		exportMenuButton.getItems().addAll(BasicFX.copyMenu(List.of(copyMenuItem, copyImageMenuItem), false));
+		exportMenuButton.getItems().addAll(BasicFX.copyMenu(List.of(copyImageMenuItem), false));
 
 		runButton.onActionProperty().bindBidirectional(runMenuItem.onActionProperty());
 		runButton.disableProperty().bindBidirectional(runMenuItem.disableProperty());
@@ -633,5 +639,13 @@ public class MainWindowController {
 
 	public CheckMenuItem getReticulateEdgesAreSpecialCheckMenuItem() {
 		return reticulateEdgesAreSpecialCheckMenuItem;
+	}
+
+	public MenuItem getCopyTreesMenuItem() {
+		return copyTreesMenuItem;
+	}
+
+	public MenuItem getCopyNetworkMenuItem() {
+		return copyNetworkMenuItem;
 	}
 }
