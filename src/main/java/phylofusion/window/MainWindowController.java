@@ -272,6 +272,9 @@ public class MainWindowController {
 	@FXML
 	private CheckMenuItem reticulateEdgesAreSpecialCheckMenuItem;
 
+	@FXML
+	private Button reticulateEdgesAreSpecialButton;
+
 	private ZoomableScrollPane scrollPane;
 
 	private final BooleanProperty disableAllShow = new SimpleBooleanProperty(false);
@@ -353,6 +356,8 @@ public class MainWindowController {
 			scrollPane.setStyle("-fx-background: black;-fx-background-color: black;");
 		else
 			scrollPane.setStyle("-fx-background: white;-fx-background-color: white;");
+
+		MaterialIcons.setIcon(reticulateEdgesAreSpecialButton, MaterialIcons.redo, "-fx-scale-y: -1;", true);
 
 	}
 
@@ -668,5 +673,9 @@ public class MainWindowController {
 
 	public MenuItem getCopyNetworkMenuItem() {
 		return copyNetworkMenuItem;
+	}
+
+	public Button getReticulateEdgesAreSpecialButton() {
+		return reticulateEdgesAreSpecialButton;
 	}
 }

@@ -31,6 +31,7 @@ import javafx.scene.layout.StackPane;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.dialog.ExportImageDialog;
 import jloda.fx.dialog.SetParameterInternalDialog;
+import jloda.fx.icons.MaterialIcons;
 import jloda.fx.util.*;
 import jloda.fx.window.MainWindowManager;
 import jloda.fx.window.SplashScreen;
@@ -159,10 +160,17 @@ public class MainWindowPresenter {
 
 		networkView.optionReticulateEdgesAreSpecialProperty().bindBidirectional(controller.getReticulateEdgesAreSpecialCheckMenuItem().selectedProperty());
 		networkView.optionReticulateEdgesAreSpecialProperty().addListener((v, o, n) -> {
+			if (n)
+				MaterialIcons.setIcon(controller.getReticulateEdgesAreSpecialButton(), MaterialIcons.redo, "-fx-scale-y: -1;", true);
+			else
+				MaterialIcons.setIcon(controller.getReticulateEdgesAreSpecialButton(), MaterialIcons.keyboard_return, "-fx-scale-x: -1;-fx-scale-y: -1;", true);
 			if (document.hasNetworks())
 				updateNetworkDrawing();
 		});
+		controller.getReticulateEdgesAreSpecialCheckMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
+		controller.getReticulateEdgesAreSpecialButton().setOnAction(e -> networkView.optionReticulateEdgesAreSpecialProperty().set(!networkView.optionReticulateEdgesAreSpecialProperty().get()));
+		controller.getReticulateEdgesAreSpecialButton().disableProperty().bind(controller.getReticulateEdgesAreSpecialCheckMenuItem().disableProperty());
 		controller.getRootPane().widthProperty().addListener(e -> updateNetworkDrawing());
 		controller.getRootPane().heightProperty().addListener(e -> updateNetworkDrawing());
 

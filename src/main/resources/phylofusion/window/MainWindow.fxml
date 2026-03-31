@@ -24,7 +24,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22.0.2"
+<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="phylofusion.window.MainWindowController">
     <children>
         <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -107,16 +107,22 @@
                                         <ToolBar minHeight="30.0" BorderPane.alignment="CENTER">
                                             <items>
                                                 <MenuButton fx:id="diagramMenuButton" text="Diagram"/>
-                                                <CheckBox fx:id="outlineCBox" mnemonicParsing="false" text="Outline">
+                                                <Button fx:id="reticulateEdgesAreSpecialButton" mnemonicParsing="false"
+                                                        text="Special">
                                                     <tooltip>
-                                                        <Tooltip text="Draw network outline"/>
+                                                        <Tooltip text="Draw reticulate edges curved or rectangular"/>
                                                     </tooltip>
-                                                </CheckBox>
+                                                </Button>
                                                 <Spinner fx:id="outlineWidthSpinner" editable="true" prefWidth="60.0">
                                                     <tooltip>
                                                         <Tooltip text="Set outline width"/>
                                                     </tooltip>
                                                 </Spinner>
+                                                <CheckBox fx:id="outlineCBox" mnemonicParsing="false" text="Outline">
+                                                    <tooltip>
+                                                        <Tooltip text="Draw network outline"/>
+                                                    </tooltip>
+                                                </CheckBox>
                                                 <Button fx:id="zoomInButton" mnemonicParsing="false" text="Zoom In"/>
                                                 <Button fx:id="zoomOutButton" layoutX="221.0" layoutY="10.0"
                                                         mnemonicParsing="false" text="Zoom Out"/>
