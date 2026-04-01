@@ -28,6 +28,7 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import jloda.fx.util.RunAfterAWhile;
+import jloda.phylo.PhyloGraph;
 import jloda.phylo.PhyloTree;
 import jloda.util.BitSetUtils;
 import jloda.util.StringUtils;
@@ -50,6 +51,8 @@ public class Document {
 	private final BooleanProperty hasNetworks = new SimpleBooleanProperty(this, "hasNetworks", false);
 	private final BooleanProperty empty = new SimpleBooleanProperty(this, "emptyProperty", false);
 
+	private final BooleanProperty hasTreeConfidences = new SimpleBooleanProperty(this, "treesHaveConfidenceValues", false);
+
 	private final BooleanProperty networksHaveWeights = new SimpleBooleanProperty(this, "networksHaveWeights", false);
 
 	private final TaxaBlock taxaBlock = new TaxaBlock();
@@ -63,7 +66,10 @@ public class Document {
 
 		treeRecords.addListener((InvalidationListener) e ->
 				RunAfterAWhile.applyInFXThread(treeRecords,
-						() -> hasTrees.set(treeRecords.stream().allMatch(r -> r.getTree() != null))));
+						() -> {
+							hasTrees.set(treeRecords.stream().allMatch(r -> r.getTree() != null));
+							hasTreeConfidences.set(hasTrees() && treeRecords.stream().map(TreeRecord::getTree).allMatch(PhyloGraph::hasEdgeConfidences));
+						}));
 	}
 
 	public void clear() {
@@ -197,7 +203,7 @@ public class Document {
 	}
 
 	public double getConfidenceThreshold() {
-		return confidenceThreshold.get();
+		return isHasTreeConfidences() ? confidenceThreshold.get() : 0.0;
 	}
 
 	public DoubleProperty confidenceThresholdProperty() {
@@ -224,5 +230,13 @@ public class Document {
 
 	public ReadOnlyBooleanProperty networksHaveWeightsProperty() {
 		return networksHaveWeights;
+	}
+
+	public boolean isHasTreeConfidences() {
+		return hasTreeConfidences.get();
+	}
+
+	public BooleanProperty hasTreeConfidencesProperty() {
+		return hasTreeConfidences;
 	}
 }

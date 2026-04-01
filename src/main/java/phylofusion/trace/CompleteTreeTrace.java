@@ -22,6 +22,7 @@ package phylofusion.trace;
 
 import jloda.graph.DAGTraversals;
 import jloda.phylo.PhyloTree;
+import jloda.util.BitSetUtils;
 
 import java.util.BitSet;
 
@@ -56,7 +57,9 @@ public class CompleteTreeTrace {
 					if (e.getTarget().getInDegree() < 2) {
 						set.or(TreeTrace.getTT(e.getTarget()));
 					} else {
-						set.or(TreeTrace.getTT(e));
+						if (TreeTrace.getTT(e.getTarget()) != null) {
+							set.or(BitSetUtils.intersection(TreeTrace.getTT(e.getTarget()), TreeTrace.getTT(e)));
+						}
 					}
 				}
 				var vSet = TreeTrace.getTT(v);

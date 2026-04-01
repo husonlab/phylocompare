@@ -91,8 +91,17 @@ public class MainWindowPresenter {
 			}
 		});
 		controller.getConfidenceTextField().setText(StringUtils.removeTrailingZerosAfterDot(confidenceThreshold.get()));
-		controller.getConfidenceTextField().disableProperty().bind(canRun.not());
+		controller.getConfidenceTextField().disableProperty().bind(document.hasTreeConfidencesProperty().not().or(canRun.not()));
+
 		confidenceThreshold.addListener(e -> controller.getRunMenuItem().fire());
+
+		controller.getSetConfidenceThresholdMenuItem().setOnAction(e -> {
+			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Confidence", "Enter min edge confidence", "0.0", s -> {
+				controller.getConfidenceTextField().setText(s);
+			});
+			dialog.show();
+		});
+		controller.getSetConfidenceThresholdMenuItem().disableProperty().bind(controller.getConfidenceTextField().disabledProperty());
 
 		networkView = new NetworkView(controller.getBottomFlowPane(), controller.getLegendVBox());
 
@@ -289,13 +298,6 @@ public class MainWindowPresenter {
 		});
 		controller.getUseNoneMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreeRecordsProperty().not()).or(algorithmsService.runningProperty()));
 
-		controller.getSetConfidenceThresholdMenuItem().setOnAction(e -> {
-			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Confidence", "Enter min edge confidence", "0.0", s -> {
-				controller.getConfidenceTextField().setText(s);
-			});
-			dialog.show();
-		});
-		controller.getSetConfidenceThresholdMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreesProperty().not()).or(algorithmsService.runningProperty()));
 
 		SplitPaneSupport.installKeepLeftSameDuringWindowResize(controller.getRootPane(), controller.getSplitPane());
 
