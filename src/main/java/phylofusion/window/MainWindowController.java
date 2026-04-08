@@ -270,6 +270,9 @@ public class MainWindowController {
 	private CheckBox outlineCBox;
 
 	@FXML
+	private MenuItem importTreeNamesMenuItem;
+
+	@FXML
 	private CheckMenuItem reticulateEdgesAreSpecialCheckMenuItem;
 
 	@FXML
@@ -677,5 +680,9 @@ public class MainWindowController {
 
 	public Button getReticulateEdgesAreSpecialButton() {
 		return reticulateEdgesAreSpecialButton;
+	}
+
+	public MenuItem getImportTreeNamesMenuItem() {
+		return importTreeNamesMenuItem;
 	}
 }

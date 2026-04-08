@@ -28,6 +28,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.dialog.ExportImageDialog;
 import jloda.fx.dialog.SetParameterInternalDialog;
@@ -38,6 +39,7 @@ import jloda.fx.window.SplashScreen;
 import jloda.fx.window.WindowGeometry;
 import jloda.fx.windownotifications.WindowNotifications;
 import jloda.phylo.algorithms.RootedNetworkProperties;
+import jloda.util.FileUtils;
 import jloda.util.NumberUtils;
 import jloda.util.StringUtils;
 import phylofusion.algorithm.AlgorithmsService;
@@ -51,6 +53,7 @@ import phylofusion.view.NetworkView;
 import splitstree6.layout.tree.TreeDiagramType;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.Duration;
@@ -509,6 +512,54 @@ public class MainWindowPresenter {
 		controller.getDeleteMenuItem().disableProperty().bind(canEditTreesList.not());
 
 		WindowMenuSetup.setup(controller.getWindowMenu(), window.fileNameProperty());
+
+		controller.getImportTreeNamesMenuItem().setOnAction(e -> {
+			var previousFile = new File(jloda.util.ProgramProperties.get("TreeNamesFile", ""));
+
+			var fileChooser = new FileChooser();
+			if (FileUtils.fileExistsAndIsNonEmpty(previousFile)) {
+				fileChooser.setInitialDirectory(previousFile.getParentFile());
+				fileChooser.setInitialFileName(previousFile.getName());
+			}
+			if (jloda.util.ProgramProperties.getProgramVersion() != null)
+				fileChooser.setTitle("Open File - " + jloda.util.ProgramProperties.getProgramVersion());
+			else
+				fileChooser.setTitle("Open File");
+			fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("text", "*.txt"));
+			final File selectedFile = fileChooser.showOpenDialog(window.getStage());
+
+			if (selectedFile != null) {
+				jloda.util.ProgramProperties.put("TreeNamesFile", selectedFile);
+				try {
+					String separator = null;
+					for (var line : FileUtils.getLinesFromFile(selectedFile.getPath())) {
+						if (!line.startsWith("#")) {
+							if (separator == null) {
+								if (line.contains("\t"))
+									separator = "\t";
+								else if (line.contains(";"))
+									separator = ";";
+								else if (line.contains(","))
+									separator = ",";
+								else throw new IOException("File must be tab-, comma- or semi-colon separated");
+							}
+							var tokens = line.split(separator);
+							if (tokens.length == 2 && NumberUtils.isInteger(tokens[0])) {
+								var id = NumberUtils.parseInt(tokens[0]);
+								var name = tokens[1];
+								document.getTreeRecords().stream().filter(r -> r.getId() == id).findFirst().ifPresent(record -> record.setName(name));
+							}
+						}
+					}
+					if (separator != null) {
+						updateTreesDrawing();
+					}
+				} catch (IOException ex) {
+					WindowNotifications.showError(controller.getCenterPane(), ex.getMessage());
+				}
+			}
+		});
+		controller.getImportTreeNamesMenuItem().disableProperty().bind(canEditTreesList.not());
 	}
 
 	public static Collection<TreeRecord> getSelectedRowsOrAll(TableView<TreeRecord> treeTableView, List<TreeRecord> treeRecords) {

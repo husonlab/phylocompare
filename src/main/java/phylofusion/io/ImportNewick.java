@@ -76,9 +76,9 @@ public class ImportNewick {
 			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d trees".formatted(phylogenies.size())));
 		} else {
 			document.clear();
-			for (var tree : phylogenies) {
-				if (tree.getName() == null || tree.getName().isBlank())
-					tree.setName("N%03d".formatted(++count));
+			for (var network : phylogenies) {
+				if (network.getName() == null || network.getName().isBlank())
+					network.setName("N%03d".formatted(++count));
 			}
 			document.addNetworks(phylogenies);
 			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d networks".formatted(phylogenies.size())));

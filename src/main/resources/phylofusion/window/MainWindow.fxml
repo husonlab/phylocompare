@@ -97,7 +97,7 @@
                                                 <VBox fx:id="legendVBox" AnchorPane.rightAnchor="20.0"
                                                       AnchorPane.topAnchor="10.0">
                                                     <children>
-                                                        <Label text="Trees"/>
+                                                        <Label text="Trees:"/>
                                                     </children>
                                                 </VBox>
                                             </children>
@@ -167,6 +167,12 @@
                                         <Menu fx:id="recentFilesMenu" mnemonicParsing="false" text="Recent"/>
 
                                         <SeparatorMenuItem mnemonicParsing="false"/>
+                                        <Menu mnemonicParsing="false" text="Import">
+                                            <items>
+                                                <MenuItem fx:id="importTreeNamesMenuItem" mnemonicParsing="false"
+                                                          text="Tree Names..."/>
+                                            </items>
+                                        </Menu>
                                         <Menu fx:id="exportMenu" mnemonicParsing="false" text="Export">
                                             <MenuItem fx:id="exportImageMenuItem" mnemonicParsing="false"
                                                       text="Image..."/>

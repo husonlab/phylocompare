@@ -37,10 +37,7 @@ import phylofusion.window.TreeRecord;
 import splitstree6.data.TaxaBlock;
 
 import java.io.IOException;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Document {
 	private final ObservableList<TreeRecord> treeRecords = FXCollections.observableArrayList();
@@ -68,7 +65,7 @@ public class Document {
 				RunAfterAWhile.applyInFXThread(treeRecords,
 						() -> {
 							hasTrees.set(treeRecords.stream().allMatch(r -> r.getTree() != null));
-							hasTreeConfidences.set(hasTrees() && treeRecords.stream().map(TreeRecord::getTree).allMatch(PhyloGraph::hasEdgeConfidences));
+							hasTreeConfidences.set(hasTrees() && treeRecords.stream().map(TreeRecord::getTree).filter(Objects::nonNull).allMatch(PhyloGraph::hasEdgeConfidences));
 						}));
 	}
 
@@ -114,7 +111,11 @@ public class Document {
 
 		if (!hasTreeRecords.get()) {
 			var treeIds = new BitSet();
+			var idNameMap = new HashMap<Integer, String>();
+
 			for (var network : networks) {
+
+
 				for (var v : network.nodes()) {
 					treeIds.or(TreeTrace.getTT(v));
 				}
