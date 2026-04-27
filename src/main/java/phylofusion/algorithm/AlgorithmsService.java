@@ -29,6 +29,7 @@ import phylofusion.trace.BruteForceTreeTracer;
 import phylofusion.utils.NexusBlocksUtils;
 import phylofusion.window.MainWindow;
 import splitstree6.algorithms.trees.trees2trees.PhyloFusion;
+import splitstree6.xtra.phyloFusionTreeTrace.PhyloFusionTreeTrace;
 import splitstree6.data.TreesBlock;
 
 import java.io.IOException;
@@ -56,7 +57,7 @@ public class AlgorithmsService extends AService<Boolean> {
 					trees = document.getRunTrees();
 				var blocks = NexusBlocksUtils.setupBlocks(document.getTaxaBlock(), trees);
 				var resultBlock = new TreesBlock();
-				var algorithm = new PhyloFusion();
+				var algorithm = new PhyloFusionTreeTrace();
 				if (trees.size() == 1) {
 					networks.add(trees.get(0));
 				} else {
