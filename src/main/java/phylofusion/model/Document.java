@@ -52,6 +52,8 @@ public class Document {
 
 	private final BooleanProperty networksHaveWeights = new SimpleBooleanProperty(this, "networksHaveWeights", false);
 
+	private final StringProperty colorSchemeName = new SimpleStringProperty(this, "colorSchemeName", "Retro29");
+
 	private final TaxaBlock taxaBlock = new TaxaBlock();
 
 	private final DoubleProperty confidenceThreshold = new SimpleDoubleProperty(this, "confidenceThreshold");
@@ -239,5 +241,17 @@ public class Document {
 
 	public BooleanProperty hasTreeConfidencesProperty() {
 		return hasTreeConfidences;
+	}
+
+	public String getColorSchemeName() {
+		return colorSchemeName.get();
+	}
+
+	public StringProperty colorSchemeNameProperty() {
+		return colorSchemeName;
+	}
+
+	public void setColorSchemeName(String colorSchemeName) {
+		this.colorSchemeName.set(colorSchemeName);
 	}
 }

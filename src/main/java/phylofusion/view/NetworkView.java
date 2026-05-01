@@ -113,7 +113,7 @@ public class NetworkView extends Group {
 		legend.getChildren().setAll(legend.getChildren().get(0));
 	}
 
-	public void update(TaxaBlock taxaBlock, List<TreeRecord> treeRecords, PhyloTree network, double scaleFactor, boolean updateNetworkDrawing, boolean updateTreesDrawing) {
+	public void update(TaxaBlock taxaBlock, List<TreeRecord> treeRecords, PhyloTree network, double scaleFactor, boolean updateNetworkDrawing, boolean updateTreesDrawing, String colorSchemeName) {
 		if (updateNetworkDrawing) {
 			clear();
 			var width = scaleFactor * Math.max(400, getTargetWidth() - 200);
@@ -134,12 +134,12 @@ public class NetworkView extends Group {
 
 				if (updateTreesDrawing) {
 					clearTracedTreesDrawing();
-					drawTracedTrees(network, treeRecords);
+					drawTracedTrees(network, colorSchemeName, treeRecords);
 				}
 			});
 		} else if (updateTreesDrawing) {
 			clearTracedTreesDrawing();
-			drawTracedTrees(network, treeRecords);
+			drawTracedTrees(network, colorSchemeName, treeRecords);
 		}
 	}
 
@@ -177,14 +177,14 @@ public class NetworkView extends Group {
 		}
 	}
 
-	private void drawTracedTrees(PhyloTree network, List<TreeRecord> treeRecords) {
+	private void drawTracedTrees(PhyloTree network, String colorSchemeName, List<TreeRecord> treeRecords) {
 		var trees = BitSetUtils.asBitSet(treeRecords.stream().filter(TreeRecord::isShow).mapToInt(TreeRecord::getId).toArray());
 		Function<Node, Point2D> nodePointFunction = v -> {
 			var shape = nodeLabeledNodeShapeMap.get(v);
 			return new Point2D(shape.getTranslateX(), shape.getTranslateY());
 		};
 		Function<Edge, Path> edgePathFunction = e -> (Path) edgeLabeledEdgeShapeHashMap.get(e).getShape();
-		tracedTreesGroup.getChildren().setAll(DrawTracedTrees.apply(network, treeRecords, trees, getOptionOutlineWidth(), nodePointFunction, edgePathFunction, legend));
+		tracedTreesGroup.getChildren().setAll(DrawTracedTrees.apply(network, colorSchemeName, treeRecords, trees, getOptionOutlineWidth(), nodePointFunction, edgePathFunction, legend));
 	}
 
 	public TreeDiagramType getOptionDiagram() {

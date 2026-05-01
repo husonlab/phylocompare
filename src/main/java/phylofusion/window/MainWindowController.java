@@ -267,7 +267,7 @@ public class MainWindowController {
 	private AnchorPane innerAnchorPane;
 
 	@FXML
-	private CheckBox outlineCBox;
+	private ToggleButton outlineToggleButton;
 
 	@FXML
 	private MenuItem importTreeNamesMenuItem;
@@ -277,6 +277,9 @@ public class MainWindowController {
 
 	@FXML
 	private Button reticulateEdgesAreSpecialButton;
+
+	@FXML
+	private ComboBox<String> colorSchemeCBox;
 
 	private ZoomableScrollPane scrollPane;
 
@@ -292,6 +295,7 @@ public class MainWindowController {
 		MaterialIcons.setIcon(exportMenuButton, MaterialIcons.ios_share);
 		MaterialIcons.setIcon(zoomInButton, MaterialIcons.zoom_in);
 		MaterialIcons.setIcon(zoomOutButton, MaterialIcons.zoom_out);
+		MaterialIcons.setIcon(outlineToggleButton, MaterialIcons.indeterminate_check_box);
 
 		if (ProgramProperties.isMacOS()) {
 			getMenuBar().setUseSystemMenuBar(true);
@@ -347,7 +351,7 @@ public class MainWindowController {
 		runButton.onActionProperty().bindBidirectional(runMenuItem.onActionProperty());
 		runButton.disableProperty().bindBidirectional(runMenuItem.disableProperty());
 
-		ProgramProperties.track(outlineCBox.selectedProperty(), true);
+		ProgramProperties.track(outlineToggleButton.selectedProperty(), true);
 
 		MainWindowManager.useDarkThemeProperty().addListener((v, o, n) -> {
 			if (n)
@@ -658,8 +662,8 @@ public class MainWindowController {
 		return innerAnchorPane;
 	}
 
-	public CheckBox getOutlineCBox() {
-		return outlineCBox;
+	public ToggleButton getOutlineToggleButton() {
+		return outlineToggleButton;
 	}
 
 	public Button getShowButton() {
@@ -684,5 +688,9 @@ public class MainWindowController {
 
 	public MenuItem getImportTreeNamesMenuItem() {
 		return importTreeNamesMenuItem;
+	}
+
+	public ComboBox<String> getColorSchemeCBox() {
+		return colorSchemeCBox;
 	}
 }

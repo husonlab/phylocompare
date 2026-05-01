@@ -20,6 +20,7 @@
 
 package phylofusion.io;
 
+import jloda.fx.util.ColorSchemeManager;
 import jloda.phylo.CommentData;
 import jloda.phylo.NewickIO;
 import jloda.phylo.PhyloTree;
@@ -42,7 +43,7 @@ public class PhyloFusionDB {
 	public static void save(String fileName,
 							List<TreeRecord> treeRecords,
 							List<PhyloTree> networks,
-							double minConfidence, double outlineWidth, boolean showOutline) throws IOException {
+							double minConfidence, double outlineWidth, boolean showOutline, String colorScheme) throws IOException {
 		String url = "jdbc:sqlite:" + fileName;
 
 		try (var conn = DriverManager.getConnection(url)) {
@@ -134,6 +135,11 @@ public class PhyloFusionDB {
 						ps.setString(3, showOutline ? "true" : "false");
 						ps.addBatch();
 					}
+					{
+						ps.setString(1, "color_scheme");
+						ps.setString(2, "string");
+						ps.setString(3, colorScheme);
+					}
 					ps.executeBatch();
 				}
 
@@ -215,6 +221,7 @@ public class PhyloFusionDB {
 				var confidenceThreshold = -1.0;
 				var outlineWidth = -1.0;
 				var showOutline = true;
+				var colorScheme = document.getColorSchemeName();
 				while (rs.next()) {
 					var name = rs.getString("name");
 					var type = rs.getString("type");
@@ -229,9 +236,14 @@ public class PhyloFusionDB {
 						if (name.equals("show_outline")) {
 							showOutline = NumberUtils.parseBoolean(value);
 						}
+					} else if (type.equals("string")) {
+						if (name.equals("color_scheme")) {
+							if (ColorSchemeManager.getInstance().getNames().contains(value))
+								colorScheme = value;
+						}
 					}
 				}
-				result = new Parameters(confidenceThreshold, outlineWidth, showOutline);
+				result = new Parameters(confidenceThreshold, outlineWidth, showOutline, colorScheme);
 			}
 			if (!treeRecords.isEmpty())
 				document.addTreesAndNetworks(treeRecords, networks.values());
@@ -255,6 +267,6 @@ public class PhyloFusionDB {
 		}
 	}
 
-	public record Parameters(double confidenceThreshold, double outlineWidth, boolean showOutline) {
+	public record Parameters(double confidenceThreshold, double outlineWidth, boolean showOutline, String colorScheme) {
 	}
 }

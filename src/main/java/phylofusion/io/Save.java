@@ -43,7 +43,7 @@ public class Save {
 			var document = window.getDocument();
 			var networkView = window.getPresenter().getNetworkView();
 			PhyloFusionDB.save(file.getPath(), document.getTreeRecords(), document.getNetworks(),
-					document.getConfidenceThreshold(), networkView.getOptionOutlineWidth(), networkView.isOptionShowOutline());
+					document.getConfidenceThreshold(), networkView.getOptionOutlineWidth(), networkView.isOptionShowOutline(), document.getColorSchemeName());
 			window.dirtyProperty().set(false);
 		} catch (IOException e) {
 			WindowNotifications.showError(window.getController().getCenterPane(), "Save failed: " + e.getMessage());

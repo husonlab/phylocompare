@@ -48,11 +48,11 @@ import static phylofusion.trace.TreeTrace.getTT;
 
 public class DrawTracedTrees {
 
-	public static Group apply(PhyloTree network, List<TreeRecord> treeRecords, BitSet trees, double outlineWidth, Function<Node, Point2D> nodePointFunction, Function<Edge, Path> edgePathFunction, VBox legend) {
+	public static Group apply(PhyloTree network, String colorSchemeName, List<TreeRecord> treeRecords, BitSet trees, double outlineWidth, Function<Node, Point2D> nodePointFunction, Function<Edge, Path> edgePathFunction, VBox legend) {
 		legend.getChildren().setAll(legend.getChildren().get(0));
 		var group = new Group();
 
-		var colorScheme = ColorSchemeManager.getInstance().getColorScheme("Twenty");
+		var colorScheme = ColorSchemeManager.getInstance().getColorScheme(colorSchemeName);
 
 		var idRecordMap = new HashMap<Integer, TreeRecord>();
 		for (var record : treeRecords) {

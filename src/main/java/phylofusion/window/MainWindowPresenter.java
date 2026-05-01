@@ -50,6 +50,7 @@ import phylofusion.io.SaveBeforeClosingDialog;
 import phylofusion.main.CheckForUpdate;
 import phylofusion.utils.DoubleSpinnerBinder;
 import phylofusion.utils.SplitPaneSupport;
+import phylofusion.view.ChooseColorSchemeSetup;
 import phylofusion.view.NetworkView;
 import splitstree6.layout.tree.TreeDiagramType;
 
@@ -70,7 +71,6 @@ public class MainWindowPresenter {
 	private final AlgorithmsService algorithmsService;
 	private final NetworkView networkView;
 
-
 	public MainWindowPresenter(MainWindow window) {
 		this.window = window;
 		var controller = window.getController();
@@ -81,6 +81,8 @@ public class MainWindowPresenter {
 		ProgramProperties.track(confidenceThreshold, 70.0);
 
 		var scaleFactor = new SimpleDoubleProperty(this, "scaleFactor", 1.0);
+
+		ChooseColorSchemeSetup.apply(window);
 
 		var canRun = document.hasTreesProperty();
 		var canShowNetwork = document.hasNetworksProperty();
@@ -114,7 +116,7 @@ public class MainWindowPresenter {
 				networkView.clear();
 			else {
 				var network = document.getNetworks().get(0);
-				networkView.update(document.getTaxaBlock(), document.getTreeRecords(), network, scaleFactor.get(), true, true);
+				networkView.update(document.getTaxaBlock(), document.getTreeRecords(), network, scaleFactor.get(), true, true, document.getColorSchemeName());
 			}
 		});
 		document.getNetworks().addListener((InvalidationListener) e -> updateNetworkDrawing());
@@ -124,11 +126,12 @@ public class MainWindowPresenter {
 				networkView.clearTracedTreesDrawing();
 			else {
 				var network = document.getNetworks().get(0);
-				networkView.update(document.getTaxaBlock(), document.getTreeRecords(), network, scaleFactor.get(), false, true);
+				networkView.update(document.getTaxaBlock(), document.getTreeRecords(), network, scaleFactor.get(), false, true, document.getColorSchemeName());
 			}
 			// todo: need to implement selection of which network to draw
 		});
 		document.getTreeRecords().addListener((InvalidationListener) e -> updateNetworkDrawing());
+		document.colorSchemeNameProperty().addListener(e -> updateTreesDrawing());
 
 		algorithmsService = new AlgorithmsService(controller.getBottomFlowPane());
 		algorithmsService.setOnSucceeded(e -> {
@@ -168,8 +171,8 @@ public class MainWindowPresenter {
 		networkView.optionShowOutlineProperty().addListener((v, o, n) -> {
 			undoManager.add("outline", networkView.optionShowOutlineProperty(), o, n);
 		});
-		networkView.optionShowOutlineProperty().bindBidirectional(controller.getOutlineCBox().selectedProperty());
-		controller.getOutlineCBox().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
+		networkView.optionShowOutlineProperty().bindBidirectional(controller.getOutlineToggleButton().selectedProperty());
+		controller.getOutlineToggleButton().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
 		networkView.optionReticulateEdgesAreSpecialProperty().bindBidirectional(controller.getReticulateEdgesAreSpecialCheckMenuItem().selectedProperty());
 		networkView.optionReticulateEdgesAreSpecialProperty().addListener((v, o, n) -> {
