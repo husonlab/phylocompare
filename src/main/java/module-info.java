@@ -11,10 +11,12 @@ module phylofusion {
 	requires java.sql;
 	requires org.apache.commons.numbers.gamma;
 	requires jdk.compiler;
+	requires com.install4j.runtime;
 
 	exports phylofusion.main;
 	opens phylofusion.main;
 
+	exports phylofusion.window;
 	opens phylofusion.window;
 	opens phylofusion.algorithm;
 	opens phylofusion.view;

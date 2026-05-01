@@ -47,6 +47,7 @@ import phylofusion.io.ExportNewick;
 import phylofusion.io.ImportNewick;
 import phylofusion.io.Save;
 import phylofusion.io.SaveBeforeClosingDialog;
+import phylofusion.main.CheckForUpdate;
 import phylofusion.utils.DoubleSpinnerBinder;
 import phylofusion.utils.SplitPaneSupport;
 import phylofusion.view.NetworkView;
@@ -138,7 +139,7 @@ public class MainWindowPresenter {
 		controller.getRunMenuItem().setOnAction(e -> {
 			if (!algorithmsService.isRunning()) {
 				this.window.getUndoManager().clear();
-				algorithmsService.setupCalculation(this.window, true, true);
+				algorithmsService.setupCalculation(this.window, true, false);
 				algorithmsService.setOnScheduled(a -> networkView.clear());
 				algorithmsService.setOnSucceeded(a -> {
 					updateNetworkDrawing();
@@ -511,8 +512,6 @@ public class MainWindowPresenter {
 		controller.getDeleteMenuItem().setOnAction(e -> document.getTreeRecords().removeAll(getSelectedRowsOrAll(controller.getTreeTable(), document.getTreeRecords())));
 		controller.getDeleteMenuItem().disableProperty().bind(canEditTreesList.not());
 
-		WindowMenuSetup.setup(controller.getWindowMenu(), window.fileNameProperty());
-
 		controller.getImportTreeNamesMenuItem().setOnAction(e -> {
 			var previousFile = new File(jloda.util.ProgramProperties.get("TreeNamesFile", ""));
 
@@ -560,6 +559,9 @@ public class MainWindowPresenter {
 			}
 		});
 		controller.getImportTreeNamesMenuItem().disableProperty().bind(canEditTreesList.not());
+
+		controller.getCheckForUpdatesMenuItem().setOnAction(e -> CheckForUpdate.apply(window));
+		controller.getCheckForUpdatesMenuItem().disableProperty().bind(MainWindowManager.getInstance().sizeProperty().greaterThan(1).or(window.dirtyProperty()));
 	}
 
 	public static Collection<TreeRecord> getSelectedRowsOrAll(TableView<TreeRecord> treeTableView, List<TreeRecord> treeRecords) {

@@ -28,9 +28,8 @@ import jloda.phylo.PhyloTree;
 import phylofusion.trace.BruteForceTreeTracer;
 import phylofusion.utils.NexusBlocksUtils;
 import phylofusion.window.MainWindow;
-import splitstree6.algorithms.trees.trees2trees.PhyloFusion;
-import splitstree6.xtra.phyloFusionTreeTrace.PhyloFusionTreeTrace;
 import splitstree6.data.TreesBlock;
+import splitstree6.xtra.phyloFusionTreeTrace.PhyloFusionTreeTrace;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,15 +54,18 @@ public class AlgorithmsService extends AService<Boolean> {
 					trees = FilterTrees.apply(document.getTaxaBlock(), document.getRunTrees(), mainWindow.getDocument().getConfidenceThreshold(), getProgressListener());
 				else
 					trees = document.getRunTrees();
+				var treeRenumberMapping = Workaround.computeTreeRenumberMapping(document.getTreeRecords(), document.getRunTrees());
 				var blocks = NexusBlocksUtils.setupBlocks(document.getTaxaBlock(), trees);
 				var resultBlock = new TreesBlock();
-				var algorithm = new PhyloFusionTreeTrace();
 				if (trees.size() == 1) {
 					networks.add(trees.get(0));
 				} else {
+					var algorithm = new PhyloFusionTreeTrace();
 					algorithm.setOptionMutualRefinement(true);
 					algorithm.compute(getProgressListener(), blocks.taxaBlock(), blocks.treesBlock(), resultBlock);
 					for (var network : resultBlock.getTrees()) {
+						Workaround.applyTreeRenumberMapping(treeRenumberMapping, network);
+
 						if (network.getRoot().getOutDegree() > 1) {
 							var v = network.getRoot();
 							network.setRoot(network.newNode());
@@ -71,7 +73,6 @@ public class AlgorithmsService extends AService<Boolean> {
 							if (network.hasEdgeWeights()) {
 								network.setWeight(e, 0.00001);
 							}
-
 						}
 					}
 					networks.addAll(resultBlock.getTrees());
@@ -98,4 +99,6 @@ public class AlgorithmsService extends AService<Boolean> {
 			return true;
 		});
 	}
+
+
 }
