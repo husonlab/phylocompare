@@ -14,12 +14,14 @@ module phylofusion {
 	requires com.install4j.runtime;
 
 	exports phylofusion.main;
-	opens phylofusion.main;
-
 	exports phylofusion.window;
+	exports phylofusion.view;
+
+	opens phylofusion.main;
 	opens phylofusion.window;
 	opens phylofusion.algorithm;
 	opens phylofusion.view;
 	opens phylofusion.utils;
 	opens phylofusion.trace;
+	opens phylofusion.model;
 }

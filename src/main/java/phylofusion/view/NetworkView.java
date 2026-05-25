@@ -161,7 +161,8 @@ public class NetworkView extends Group {
 
 					outline.setStrokeWidth(outlineWidth);
 
-					outline.setStroke(MainWindowManager.isUseDarkTheme() ? Color.BLACK : Color.WHITE);
+					//outline.setStroke(MainWindowManager.isUseDarkTheme() ? Color.BLACK : Color.WHITE);
+					outline.getStyleClass().add("background-stroke");
 					outline.setFill(Color.TRANSPARENT);
 					edgeOutlineMap.put(e, outline);
 					InvalidationListener listener = b -> outline.getElements().setAll(PathUtils.copy(path.getElements()));

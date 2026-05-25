@@ -86,7 +86,7 @@ public class Document {
 			if (tree.nodeStream().noneMatch(v -> v.getInDegree() > 1)) {
 				if (tree.getName() == null || tree.getName().isBlank())
 					tree.setName("T%03d".formatted(nextId));
-				treeRecords.add(new TreeRecord(tree.getName(), nextId, true, true, tree));
+				treeRecords.add(new TreeRecord(tree.getName(), nextId, nextId <= 2, nextId <= 2, tree));
 				nextId++;
 			}
 		}
@@ -205,7 +205,7 @@ public class Document {
 		return empty;
 	}
 
-	public double getConfidenceThreshold() {
+	public double getApplicableConfidenceThreshold() {
 		return isHasTreeConfidences() ? confidenceThreshold.get() : 0.0;
 	}
 

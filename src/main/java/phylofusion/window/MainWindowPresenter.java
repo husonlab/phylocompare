@@ -48,6 +48,8 @@ import phylofusion.io.ImportNewick;
 import phylofusion.io.Save;
 import phylofusion.io.SaveBeforeClosingDialog;
 import phylofusion.main.CheckForUpdate;
+import phylofusion.trace.BruteForceTreeTracer;
+import phylofusion.trace.TreeTrace;
 import phylofusion.utils.DoubleSpinnerBinder;
 import phylofusion.utils.SplitPaneSupport;
 import phylofusion.view.ChooseColorSchemeSetup;
@@ -111,7 +113,7 @@ public class MainWindowPresenter {
 
 		networkView = new NetworkView(controller.getBottomFlowPane(), controller.getLegendVBox());
 
-		updateNetworkDrawing = () -> RunAfterAWhile.applyInFXThread("updateNetworkDrawing", () -> {
+		updateNetworkDrawing = () -> RunAfterAWhile.applyInFXThread("runUpdateNetworkDrawing", () -> {
 			if (document.getNetworks().isEmpty())
 				networkView.clear();
 			else {
@@ -119,9 +121,9 @@ public class MainWindowPresenter {
 				networkView.update(document.getTaxaBlock(), document.getTreeRecords(), network, scaleFactor.get(), true, true, document.getColorSchemeName());
 			}
 		});
-		document.getNetworks().addListener((InvalidationListener) e -> updateNetworkDrawing());
+		document.getNetworks().addListener((InvalidationListener) e -> runUpdateNetworkDrawing());
 
-		updateTreesDrawing = () -> RunAfterAWhile.applyInFXThread("updateTreesDrawing", () -> {
+		updateTreesDrawing = () -> RunAfterAWhile.applyInFXThread("runUpdateTreesDrawing", () -> {
 			if (document.getNetworks().isEmpty())
 				networkView.clearTracedTreesDrawing();
 			else {
@@ -130,8 +132,8 @@ public class MainWindowPresenter {
 			}
 			// todo: need to implement selection of which network to draw
 		});
-		document.getTreeRecords().addListener((InvalidationListener) e -> updateNetworkDrawing());
-		document.colorSchemeNameProperty().addListener(e -> updateTreesDrawing());
+		document.getTreeRecords().addListener((InvalidationListener) e -> runUpdateNetworkDrawing());
+		document.colorSchemeNameProperty().addListener(e -> runUpdateTreesDrawing());
 
 		algorithmsService = new AlgorithmsService(controller.getBottomFlowPane());
 		algorithmsService.setOnSucceeded(e -> {
@@ -142,10 +144,10 @@ public class MainWindowPresenter {
 		controller.getRunMenuItem().setOnAction(e -> {
 			if (!algorithmsService.isRunning()) {
 				this.window.getUndoManager().clear();
-				algorithmsService.setupCalculation(this.window, true, false);
+				algorithmsService.setupCalculation(this.window, true);
 				algorithmsService.setOnScheduled(a -> networkView.clear());
 				algorithmsService.setOnSucceeded(a -> {
-					updateNetworkDrawing();
+					runUpdateNetworkDrawing();
 					window.dirtyProperty().set(true);
 				});
 				algorithmsService.restart();
@@ -157,15 +159,15 @@ public class MainWindowPresenter {
 		controller.getOutlineWidthSpinner().disableProperty().bind(canShowNetwork.not());
 
 		networkView.optionOutlineWidthProperty().addListener((v, o, n) -> {
-			updateNetworkDrawing();
+			runUpdateNetworkDrawing();
 			undoManager.add("width", networkView.optionOutlineWidthProperty(), o, n);
 		});
 		networkView.optionAveragingProperty().addListener((v, o, n) -> {
-			updateNetworkDrawing();
+			runUpdateNetworkDrawing();
 			undoManager.add("averaging", networkView.optionAveragingProperty(), o, n);
 		});
 		networkView.optionDiagramProperty().addListener((v, o, n) -> {
-			updateNetworkDrawing();
+			runUpdateNetworkDrawing();
 			undoManager.add("diagram", networkView.optionDiagramProperty(), o, n);
 		});
 		networkView.optionShowOutlineProperty().addListener((v, o, n) -> {
@@ -181,14 +183,14 @@ public class MainWindowPresenter {
 			else
 				MaterialIcons.setIcon(controller.getReticulateEdgesAreSpecialButton(), MaterialIcons.keyboard_return, "-fx-scale-x: -1;-fx-scale-y: -1;", true);
 			if (document.hasNetworks())
-				updateNetworkDrawing();
+				runUpdateNetworkDrawing();
 		});
 		controller.getReticulateEdgesAreSpecialCheckMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
 		controller.getReticulateEdgesAreSpecialButton().setOnAction(e -> networkView.optionReticulateEdgesAreSpecialProperty().set(!networkView.optionReticulateEdgesAreSpecialProperty().get()));
 		controller.getReticulateEdgesAreSpecialButton().disableProperty().bind(controller.getReticulateEdgesAreSpecialCheckMenuItem().disableProperty());
-		controller.getRootPane().widthProperty().addListener(e -> updateNetworkDrawing());
-		controller.getRootPane().heightProperty().addListener(e -> updateNetworkDrawing());
+		controller.getRootPane().widthProperty().addListener(e -> runUpdateNetworkDrawing());
+		controller.getRootPane().heightProperty().addListener(e -> runUpdateNetworkDrawing());
 
 		var stackPane = new StackPane(networkView);
 		stackPane.setPadding(new Insets(25));
@@ -325,14 +327,14 @@ public class MainWindowPresenter {
 					record.setShow(selected.contains(record));
 				}
 			}
-			updateTreesDrawing();
+			runUpdateTreesDrawing();
 			updateStatusLine.invalidated(null);
 			window.dirtyProperty().set(true);
 		});
 		controller.getShowSelectedMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(networkView.runningProperty()).or(algorithmsService.runningProperty()).or(document.hasTreeRecordsProperty().not()));
 
 		controller.getShowButton().setOnAction(e -> {
-			updateTreesDrawing();
+			runUpdateTreesDrawing();
 			updateStatusLine.invalidated(null);
 			window.dirtyProperty().set(true);
 		});
@@ -554,7 +556,7 @@ public class MainWindowPresenter {
 						}
 					}
 					if (separator != null) {
-						updateTreesDrawing();
+						runUpdateTreesDrawing();
 					}
 				} catch (IOException ex) {
 					WindowNotifications.showError(controller.getCenterPane(), ex.getMessage());
@@ -565,6 +567,14 @@ public class MainWindowPresenter {
 
 		controller.getCheckForUpdatesMenuItem().setOnAction(e -> CheckForUpdate.apply(window));
 		controller.getCheckForUpdatesMenuItem().disableProperty().bind(MainWindowManager.getInstance().sizeProperty().greaterThan(1).or(window.dirtyProperty()));
+
+		controller.getShowTreesExhaustive().setOnAction(e -> {
+			for (var network : document.getNetworks()) {
+				TreeTrace.clearTT(network);
+			}
+			runUpdateTreesDrawing();
+		});
+
 	}
 
 	public static Collection<TreeRecord> getSelectedRowsOrAll(TableView<TreeRecord> treeTableView, List<TreeRecord> treeRecords) {
@@ -575,13 +585,14 @@ public class MainWindowPresenter {
 		}
 	}
 
-	public void updateNetworkDrawing() {
+	public void runUpdateNetworkDrawing() {
 		updateNetworkDrawing.run();
 	}
 
-	public void updateTreesDrawing() {
-		if (!algorithmsService.isRunning()) {
-			algorithmsService.setupCalculation(window, false, true);
+	public void runUpdateTreesDrawing() {
+		updateTreesDrawing.run();
+		if (!algorithmsService.isRunning() && BruteForceTreeTracer.requireTracing(window.getDocument().getNetworks(), window.getDocument().getTreeRecords())) {
+			algorithmsService.setupCalculation(window, false);
 			algorithmsService.setOnSucceeded(a -> {
 				updateTreesDrawing.run();
 				window.dirtyProperty().set(true);

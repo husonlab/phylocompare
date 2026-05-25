@@ -25,12 +25,16 @@ import jloda.fx.util.RecentFilesManager;
 import jloda.fx.window.MainWindowManager;
 import jloda.fx.window.NotificationManager;
 import jloda.fx.windownotifications.WindowNotifications;
+import jloda.phylo.PhyloGraph;
 import jloda.util.FileUtils;
 import phylofusion.window.MainWindow;
 import phylofusion.window.NewWindow;
+import splitstree6.data.TaxaBlock;
+import splitstree6.data.TreesBlock;
+import splitstree6.io.readers.NexusImporter;
+import splitstree6.io.writers.trees.NewickWriter;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -63,7 +67,16 @@ public class FileOpener implements Consumer<String> {
 			} else {
 				var firstLine = Objects.requireNonNull(FileUtils.getFirstLineFromFile(new File(fileName))).trim().toLowerCase();
 				if (firstLine.startsWith("#nexus")) {
-					NotificationManager.showWarning("Invalid nexus: Can only open nexus files that contain trees");
+					var taxa = new TaxaBlock();
+					var trees = new TreesBlock();
+					NexusImporter.parse(fileName, taxa, trees);
+
+					var w = new StringWriter();
+					var newickWriter = new NewickWriter();
+					newickWriter.optionEdgeWeightsProperty().set(trees.getTrees().stream().anyMatch(PhyloGraph::hasEdgeWeights));
+					newickWriter.optionEdgeConfidencesProperty().set(trees.getTrees().stream().anyMatch(PhyloGraph::hasEdgeConfidences));
+					newickWriter.write(w, taxa, trees);
+					ImportNewick.apply(new BufferedReader(new StringReader(w.toString())), window);
 				} else if (firstLine.startsWith("<nex:nexml") || firstLine.startsWith("<?xml version="))
 					NotificationManager.showWarning("NEXML: not implemented");
 				else if (firstLine.startsWith("(") || firstLine.contains(")")) {
@@ -72,7 +85,6 @@ public class FileOpener implements Consumer<String> {
 			}
 			RecentFilesManager.getInstance().insertRecentFile(fileName);
 			window.setFileName(fileName);
-
 		} catch (IOException e) {
 			WindowNotifications.showError(window.getController().getCenterPane(), "Open file failed: " + e.getMessage());
 		}

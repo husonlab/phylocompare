@@ -281,6 +281,9 @@ public class MainWindowController {
 	@FXML
 	private ComboBox<String> colorSchemeCBox;
 
+	@FXML
+	private MenuItem showTreesExhaustive;
+
 	private ZoomableScrollPane scrollPane;
 
 	private final BooleanProperty disableAllShow = new SimpleBooleanProperty(false);
@@ -692,5 +695,9 @@ public class MainWindowController {
 
 	public ComboBox<String> getColorSchemeCBox() {
 		return colorSchemeCBox;
+	}
+
+	public MenuItem getShowTreesExhaustive() {
+		return showTreesExhaustive;
 	}
 }

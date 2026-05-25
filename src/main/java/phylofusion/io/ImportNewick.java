@@ -21,11 +21,13 @@
 package phylofusion.io;
 
 import javafx.application.Platform;
+import jloda.fx.util.RunAfterAWhile;
 import jloda.fx.windownotifications.WindowNotifications;
 import jloda.phylo.CommentData;
 import jloda.phylo.NewickIO;
 import jloda.phylo.PhyloTree;
 import jloda.util.FileUtils;
+import jloda.util.StringUtils;
 import phylofusion.window.MainWindow;
 
 import java.io.BufferedReader;
@@ -67,22 +69,32 @@ public class ImportNewick {
 		if (areTrees) {
 			if (!document.hasTrees())
 				document.clear();
-
+			var names = new ArrayList<String>();
 			for (var tree : phylogenies) {
-				if (tree.getName() == null || tree.getName().isBlank())
+				if (tree.getName() == null || tree.getName().isBlank()) {
 					tree.setName("T%03d".formatted(++count));
+				}
+				tree.setName(StringUtils.getUniqueName(tree.getName(), names));
+				names.add(tree.getName());
 			}
 			document.addTrees(phylogenies);
-			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d trees".formatted(phylogenies.size())));
+			Platform.runLater(() -> {
+				WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d trees".formatted(phylogenies.size()));
+				RunAfterAWhile.applyInFXThread(names, () -> window.getController().getRunMenuItem().fire());
+			});
 		} else {
 			document.clear();
+			var names = new ArrayList<String>();
 			for (var network : phylogenies) {
-				if (network.getName() == null || network.getName().isBlank())
+				if (network.getName() == null || network.getName().isBlank()) {
 					network.setName("N%03d".formatted(++count));
+				}
+				network.setName(StringUtils.getUniqueName(network.getName(), names));
+				names.add(network.getName());
 			}
 			document.addNetworks(phylogenies);
 			Platform.runLater(() -> WindowNotifications.showInfo(window.getController().getCenterAnchorPane(), "Imported %d networks".formatted(phylogenies.size())));
-			Platform.runLater(() -> window.getPresenter().updateNetworkDrawing());
+			Platform.runLater(() -> window.getPresenter().runUpdateNetworkDrawing());
 		}
 	}
 

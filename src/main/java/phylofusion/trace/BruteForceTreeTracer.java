@@ -24,7 +24,10 @@ import jloda.graph.DAGTraversals;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.graph.NodeArray;
+import jloda.phylo.CommentData;
+import jloda.phylo.NewickIO;
 import jloda.phylo.PhyloTree;
+import jloda.phylo.algorithms.ClusterPoppingAlgorithm;
 import jloda.util.*;
 import jloda.util.progress.ProgressListener;
 import jloda.util.progress.ProgressSilent;
@@ -38,6 +41,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static phylofusion.trace.TreeTrace.getTT;
+import static phylofusion.trace.TreeTrace.setTT;
 
 /**
  * uses brute force trace of all shown trees in the network
@@ -82,7 +86,7 @@ public class BruteForceTreeTracer {
 
 			try {
 				ExecuteInParallel.apply(choices, choice -> {
-					traceTrees(taxaBlock, network, choice, requireComputation, minConfidence);
+					traceTrees(taxaBlock, network, choice, requireComputation, minConfidence, progress);
 				}, ProgramExecutorService.getNumberOfCoresToUse(), progress);
 				CompleteTreeTrace.apply(network);
 			} catch (InterruptedException ignored) {
@@ -99,29 +103,42 @@ public class BruteForceTreeTracer {
 	 * @param chosenReticulateEdges one edge per reticulation
 	 * @param treeRecords           the tree rows
 	 */
-	private static void traceTrees(TaxaBlock taxaBlock, PhyloTree network, Set<Edge> chosenReticulateEdges, List<TreeRecord> treeRecords, double minConfidence) {
+	private static void traceTrees(TaxaBlock taxaBlock, PhyloTree network, Set<Edge> chosenReticulateEdges, List<TreeRecord> treeRecords, double minConfidence, ProgressListener progress) throws CanceledException {
 		//System.err.println("Reticulate edges: "+StringUtils.toString(chosenReticulateEdges,", "));
-		var networkClusters = extractAllClusters(network, chosenReticulateEdges);
-		//System.err.println("Network clusters: "+StringUtils.toString(networkClusters,", "));
-		var networkTaxa = BitSetUtils.union(networkClusters);
+		var treeInNetworkClusters = extractAllClusters(network, chosenReticulateEdges);
+		//System.err.println("Network clusters: "+StringUtils.toString(treeInNetworkClusters,", "));
+		if (false) {
+			var treeInNetwork = new PhyloTree();
+			ClusterPoppingAlgorithm.apply(treeInNetworkClusters, treeInNetwork);
+			for (var v : treeInNetwork.nodes()) {
+				if (treeInNetwork.hasTaxa(v)) {
+					treeInNetwork.setLabel(v, taxaBlock.getLabel(treeInNetwork.getTaxon(v)));
+				}
+			}
+			System.err.println("TreeInNetwork " + treeInNetwork.toBracketString(false) + ";");
+		}
+		var networkTaxa = BitSetUtils.union(treeInNetworkClusters);
 		var rootBitSet = getTT(network.getRoot());
 
-		for (var row : treeRecords) {
-			if (row.isShow() && !rootBitSet.get(row.getId())) {
-				PhyloTree tree = row.getTree();
+		for (var record : treeRecords) {
+			if (record.isShow() && !rootBitSet.get(record.getId())) {
+				var tree = record.getTree();
 				if (minConfidence > 0.0) {
 					tree = FilterTrees.apply(taxaBlock, List.of(tree), minConfidence, new ProgressSilent()).get(0);
-				} else tree = row.getTree();
+				} else
+					tree = record.getTree();
+
+				if (false)
+					System.err.println("Tree " + record.getId() + ": " + tree.toBracketString(false) + ";");
+
 				var treeClusters = extractAllClusters(tree, Collections.emptySet());
-				//System.err.println("Tree "+row.getId()+": "+row.getTree().toBracketString(false)+";");
-				//System.err.println("Tree "+row.getId()+" clusters: "+StringUtils.toString(treeClusters,", "));
 
 				var treeTaxa = BitSetUtils.union(treeClusters);
 				if (treeTaxa.cardinality() == networkTaxa.cardinality()) {
-					if (!allCompatible(networkClusters, treeClusters))
+					if (!allCompatible(treeInNetworkClusters, treeClusters))
 						continue;
 				} else {
-					var inducedNetworkClusters = networkClusters.stream()
+					var inducedNetworkClusters = treeInNetworkClusters.stream()
 							.map(c -> BitSetUtils.intersection(c, treeTaxa))
 							.filter(c -> c.cardinality() > 0).collect(Collectors.toSet());
 					if (!allCompatible(inducedNetworkClusters, treeClusters))
@@ -130,13 +147,33 @@ public class BruteForceTreeTracer {
 				// tree is contained in network using selected reticulate edges
 				for (var v : network.nodes()) {
 					if (v == network.getRoot() || (v.isLeaf() && treeTaxa.get(network.getTaxon(v)))) {
-						getTT(v).set(row.getId());
+						getTT(v).set(record.getId());
 					}
 				}
 				for (var e : chosenReticulateEdges) {
-					getTT(e).set(row.getId());
+					getTT(e).set(record.getId());
+				}
+				network.postorderTraversal(v -> {
+					if (getTT(v) == null)
+						setTT(v);
+					for (var e : v.outEdges()) {
+						if (v.getInDegree() <= 1) {
+							var w = e.getTarget();
+							setTT(v, BitSetUtils.union(getTT(v), getTT(w)));
+						} else if (getTT(e) != null) {
+							setTT(v, BitSetUtils.union(getTT(v), getTT(e)));
+						}
+					}
+				});
+				if (false) {
+					var newickIO = new NewickIO();
+					newickIO.allowMultiLabeledNodes = false;
+					newickIO.setNewickNodeCommentSupplier(CommentData.createDataNodeSupplier());
+					newickIO.setNewickEdgeCommentSupplier(CommentData.createDataEdgeSupplier());
+					System.err.println("Network " + newickIO.toBracketString(network, true) + ";");
 				}
 			}
+			progress.checkForCancel();
 		}
 	}
 
@@ -198,5 +235,17 @@ public class BruteForceTreeTracer {
 			}
 		}
 		return true;
+	}
+
+
+	public static boolean requireTracing(List<PhyloTree> networks, List<TreeRecord> treeRecords) {
+		for (var network : networks) {
+			var set = getTT(network.getRoot());
+			for (var row : treeRecords) {
+				if (row.isShow() && (set == null || !set.get(row.getId())))
+					return true;
+			}
+		}
+		return false;
 	}
 }

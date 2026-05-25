@@ -23,6 +23,10 @@
     -fx-background-color: white;
 }
 
+.background-stroke {
+    -fx-stroke: white;
+}
+
 .chart-pie {
     -fx-border-width: 0.5px;
 }

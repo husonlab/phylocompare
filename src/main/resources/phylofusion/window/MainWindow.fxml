@@ -24,7 +24,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1"
+<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22.0.2"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="phylofusion.window.MainWindowController">
     <children>
         <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -295,10 +295,12 @@
                                                   text="Show Selected Trees"/>
 
                                         <SeparatorMenuItem mnemonicParsing="false"/>
-                                        <MenuItem fx:id="setConfidenceThresholdMenuItem" mnemonicParsing="false"
-                                                  text="Set Confidence Threshold..."/>
+                                        <MenuItem fx:id="showTreesExhaustive" mnemonicParsing="false"
+                                                  text="Show Trees Exhaustive"/>
 
                                         <SeparatorMenuItem mnemonicParsing="false"/>
+                                        <MenuItem fx:id="setConfidenceThresholdMenuItem" mnemonicParsing="false"
+                                                  text="Set Confidence Threshold..."/>
                                     </items>
                                 </Menu>
 

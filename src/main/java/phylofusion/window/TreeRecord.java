@@ -38,6 +38,10 @@ public class TreeRecord {
 		this.id = id;
 		setRun(run);
 		setShow(show);
+		this.runProperty().addListener((v, o, n) -> {
+			if (n)
+				setShow(true);
+		});
 		this.tree = tree;
 	}
 

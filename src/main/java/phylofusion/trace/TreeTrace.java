@@ -23,6 +23,7 @@ package phylofusion.trace;
 import jloda.graph.Edge;
 import jloda.graph.Node;
 import jloda.phylo.CommentData;
+import jloda.phylo.PhyloTree;
 
 import java.util.BitSet;
 
@@ -50,5 +51,10 @@ public class TreeTrace {
 		} else if (nodeOrEdge instanceof Edge e) {
 			e.setData(commentData);
 		}
+	}
+
+	public static void clearTT(PhyloTree phylo) {
+		phylo.nodeStream().filter(a -> getTT(a) != null).forEach(a -> getTT(a).clear());
+		phylo.edgeStream().filter(a -> getTT(a) != null).forEach(a -> getTT(a).clear());
 	}
 }

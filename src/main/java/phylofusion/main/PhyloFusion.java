@@ -47,9 +47,7 @@ public class PhyloFusion extends Application {
 
     @Override
     public void init() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            ProgramProperties.store();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(ProgramProperties::store));
         ProgramProperties.setUseGUI(true);
     }
 

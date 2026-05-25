@@ -71,6 +71,8 @@ public class DrawTracedTrees {
 			var label = new ToggleButton();
 			label.setStyle("-fx-text-fill: " + ColorUtilsFX.toStringCSS(color) + "; -fx-background-color: transparent; -fx-border-color: transparent;");
 			label.setText(idRecordMap.containsKey(treeId) ? idRecordMap.get(treeId).getName() : "???");
+			if (!getTT(network.getRoot()).get(treeId))
+				label.setText(("[ %s ]").formatted(label.getText()));
 			legend.getChildren().add(new HBox(new Text(" "), label));
 
 			addHoverEffect(color, label.selectedProperty(), treeGroup, label);

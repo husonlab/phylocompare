@@ -33,15 +33,20 @@ import java.util.Map;
 import static phylofusion.trace.TreeTrace.getTT;
 import static phylofusion.trace.TreeTrace.setTT;
 
+/**
+ * implements a workaround to address the issue that PhyloFusion tracing returns tree ids 1..n, based on list of input trees
+ * Daniel Huson, 5.2026
+ */
 public class Workaround {
 	public static Map<Integer, Integer> computeTreeRenumberMapping(ObservableList<TreeRecord> treeRecords, List<PhyloTree> runTrees) {
+		// System.err.println("Tree records: " + StringUtils.toString(treeRecords.stream().map(TreeRecord::getName).toList(),", "));
 		var map = new HashMap<Integer, Integer>();
 		for (var i = 0; i < runTrees.size(); i++) {
 			var runTree = runTrees.get(i);
-			for (var j = 0; j < treeRecords.size(); j++) {
-				var treeRecord = treeRecords.get(j);
-				if (treeRecord.getTree().equals(runTree)) {
-					map.put(i + 1, j + 1);
+			for (var treeRecord : treeRecords) {
+				if (treeRecord.getTree().getName().equals(runTree.getName())) {
+					map.put(i + 1, treeRecord.getId());
+					//System.err.println(treeRecord.getName() + "[" + (i + 1) + "] -> " + treeRecord.getId());
 					break;
 				}
 			}
@@ -66,6 +71,7 @@ public class Workaround {
 				if (tracedSet != null) {
 					var adjustedSet = BitSetUtils.asBitSet(BitSetUtils.asStream(tracedSet).mapToInt(treeRenumberMapping::get).toArray());
 					setTT(e, adjustedSet);
+					//System.err.println(StringUtils.toString(tracedSet)+" -> "+StringUtils.toString(adjustedSet));
 				}
 			}
 		}
