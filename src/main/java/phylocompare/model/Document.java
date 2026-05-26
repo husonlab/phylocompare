@@ -27,6 +27,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import jloda.fx.util.ProgramProperties;
 import jloda.fx.util.RunAfterAWhile;
 import jloda.phylo.PhyloGraph;
 import jloda.phylo.PhyloTree;
@@ -59,6 +60,8 @@ public class Document {
 	private final DoubleProperty confidenceThreshold = new SimpleDoubleProperty(this, "confidenceThreshold");
 
 	public Document() {
+		ProgramProperties.track(confidenceThreshold, 0.0);
+
 		hasTreeRecords.bind(Bindings.isNotEmpty(treeRecords));
 		hasNetworks.bind(Bindings.isNotEmpty(networks));
 		empty.bind(hasTreeRecords.not().and(hasNetworks.not()));

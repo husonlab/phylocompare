@@ -37,6 +37,7 @@ import jloda.util.Basic;
 import jloda.util.ProgramExecutorService;
 import jloda.util.UsageException;
 import phylocompare.window.MainWindow;
+import splitstree6.layout.tree.CreateEdges;
 import splitstree6.main.SplitsTree6;
 
 import java.io.File;
@@ -49,6 +50,7 @@ public class PhyloCompare extends Application {
     public void init() {
         Runtime.getRuntime().addShutdownHook(new Thread(ProgramProperties::store));
         ProgramProperties.setUseGUI(true);
+        CreateEdges.ALLOW_ARROW_HEADS = false;
     }
 
     /**

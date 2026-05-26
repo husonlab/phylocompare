@@ -246,7 +246,10 @@ public class MainWindowController {
 	private MenuButton diagramMenuButton;
 
 	@FXML
-	private Spinner<Double> outlineWidthSpinner;
+	private Spinner<Double> outlineSpreadSpinner;
+
+	@FXML
+	private Spinner<Double> transferAcceptorPercentSpinner;
 
 	@FXML
 	private Button showButton;
@@ -267,22 +270,35 @@ public class MainWindowController {
 	private AnchorPane innerAnchorPane;
 
 	@FXML
-	private ToggleButton outlineToggleButton;
+	private CheckMenuItem showOutlineCheckMenuItem;
+
+	@FXML
+	private CheckMenuItem showOutlineCheckMenuItem2;
 
 	@FXML
 	private MenuItem importTreeNamesMenuItem;
 
 	@FXML
-	private CheckMenuItem reticulateEdgesAreSpecialCheckMenuItem;
+	private CheckMenuItem curvedReticulateEdgesCheckMenuItem;
 
 	@FXML
-	private Button reticulateEdgesAreSpecialButton;
+	private CheckMenuItem curvedReticulateEdgesCheckMenuItem2;
 
 	@FXML
 	private ComboBox<String> colorSchemeCBox;
 
 	@FXML
 	private MenuItem showTreesExhaustive;
+
+	@FXML
+	private MenuButton settingsMenuButton;
+
+	@FXML
+	private CheckMenuItem showTransferMenuItem;
+
+	@FXML
+	private CheckMenuItem showTransferMenuItem2;
+
 
 	private ZoomableScrollPane scrollPane;
 
@@ -291,6 +307,8 @@ public class MainWindowController {
 
 	@FXML
 	private void initialize() {
+		MaterialIcons.setIcon(settingsMenuButton, MaterialIcons.tune);
+
 		MaterialIcons.setIcon(runButton, MaterialIcons.play_circle, "", false);
 		MaterialIcons.setIcon(showButton, MaterialIcons.play_circle, "", false);
 		MaterialIcons.setIcon(selectAllTableButton, MaterialIcons.select_all);
@@ -298,7 +316,9 @@ public class MainWindowController {
 		MaterialIcons.setIcon(exportMenuButton, MaterialIcons.ios_share);
 		MaterialIcons.setIcon(zoomInButton, MaterialIcons.zoom_in);
 		MaterialIcons.setIcon(zoomOutButton, MaterialIcons.zoom_out);
-		MaterialIcons.setIcon(outlineToggleButton, MaterialIcons.indeterminate_check_box);
+
+		diagramMenuButton.setStyle("-fx-background-color: transparent;");
+		colorSchemeCBox.setStyle("-fx-background-color: transparent;");
 
 		if (ProgramProperties.isMacOS()) {
 			getMenuBar().setUseSystemMenuBar(true);
@@ -354,7 +374,14 @@ public class MainWindowController {
 		runButton.onActionProperty().bindBidirectional(runMenuItem.onActionProperty());
 		runButton.disableProperty().bindBidirectional(runMenuItem.disableProperty());
 
-		ProgramProperties.track(outlineToggleButton.selectedProperty(), true);
+		curvedReticulateEdgesCheckMenuItem2.selectedProperty().bindBidirectional(curvedReticulateEdgesCheckMenuItem.selectedProperty());
+		curvedReticulateEdgesCheckMenuItem2.disableProperty().bind(curvedReticulateEdgesCheckMenuItem.disableProperty());
+
+		showOutlineCheckMenuItem2.selectedProperty().bindBidirectional(showOutlineCheckMenuItem.selectedProperty());
+		showOutlineCheckMenuItem2.disableProperty().bind(showOutlineCheckMenuItem.disableProperty());
+
+		showTransferMenuItem2.selectedProperty().bindBidirectional(showTransferMenuItem.selectedProperty());
+		showTransferMenuItem2.disableProperty().bind(showTransferMenuItem.disableProperty());
 
 		MainWindowManager.useDarkThemeProperty().addListener((v, o, n) -> {
 			if (n)
@@ -366,9 +393,6 @@ public class MainWindowController {
 			scrollPane.setStyle("-fx-background: black;-fx-background-color: black;");
 		else
 			scrollPane.setStyle("-fx-background: white;-fx-background-color: white;");
-
-		MaterialIcons.setIcon(reticulateEdgesAreSpecialButton, MaterialIcons.redo, "-fx-scale-y: -1;", true);
-
 	}
 
 	public BooleanProperty disableAllRunProperty() {
@@ -621,8 +645,12 @@ public class MainWindowController {
 		return selectNoneTableButton;
 	}
 
-	public Spinner<Double> getOutlineWidthSpinner() {
-		return outlineWidthSpinner;
+	public Spinner<Double> getOutlineSpreadSpinner() {
+		return outlineSpreadSpinner;
+	}
+
+	public Spinner<Double> getTransferAcceptorPercentSpinner() {
+		return transferAcceptorPercentSpinner;
 	}
 
 	public MenuButton getDiagramMenuButton() {
@@ -665,16 +693,17 @@ public class MainWindowController {
 		return innerAnchorPane;
 	}
 
-	public ToggleButton getOutlineToggleButton() {
-		return outlineToggleButton;
+
+	public CheckMenuItem getShowOutlineCheckMenuItem() {
+		return showOutlineCheckMenuItem;
 	}
 
 	public Button getShowButton() {
 		return showButton;
 	}
 
-	public CheckMenuItem getReticulateEdgesAreSpecialCheckMenuItem() {
-		return reticulateEdgesAreSpecialCheckMenuItem;
+	public CheckMenuItem getCurvedReticulateEdgesCheckMenuItem() {
+		return curvedReticulateEdgesCheckMenuItem;
 	}
 
 	public MenuItem getCopyTreesMenuItem() {
@@ -683,10 +712,6 @@ public class MainWindowController {
 
 	public MenuItem getCopyNetworkMenuItem() {
 		return copyNetworkMenuItem;
-	}
-
-	public Button getReticulateEdgesAreSpecialButton() {
-		return reticulateEdgesAreSpecialButton;
 	}
 
 	public MenuItem getImportTreeNamesMenuItem() {
@@ -699,5 +724,9 @@ public class MainWindowController {
 
 	public MenuItem getShowTreesExhaustive() {
 		return showTreesExhaustive;
+	}
+
+	public CheckMenuItem getShowTransferMenuItem() {
+		return showTransferMenuItem;
 	}
 }

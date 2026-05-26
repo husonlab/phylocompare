@@ -24,7 +24,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22.0.2"
+<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="phylocompare.window.MainWindowController">
     <children>
         <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -107,25 +107,64 @@
                                         <ToolBar minHeight="30.0" BorderPane.alignment="CENTER">
                                             <items>
                                                 <MenuButton fx:id="diagramMenuButton" text="Diagram"/>
-                                                <Button fx:id="reticulateEdgesAreSpecialButton" mnemonicParsing="false"
-                                                        text="Special">
-                                                    <tooltip>
-                                                        <Tooltip text="Draw reticulate edges curved or rectangular"/>
-                                                    </tooltip>
-                                                </Button>
-                                                <Spinner fx:id="outlineWidthSpinner" editable="true" prefWidth="60.0">
-                                                    <tooltip>
-                                                        <Tooltip text="Set outline width"/>
-                                                    </tooltip>
-                                                </Spinner>
-                                                <ToggleButton fx:id="outlineToggleButton" mnemonicParsing="false"
-                                                              text="Outline">
-                                                    <tooltip>
-                                                        <Tooltip text="Draw network outline"/>
-                                                    </tooltip>
-                                                </ToggleButton>
+                                                <MenuButton fx:id="settingsMenuButton" mnemonicParsing="false"
+                                                            text="Settings">
+                                                    <items>
+                                                        <CheckMenuItem fx:id="showOutlineCheckMenuItem2"
+                                                                       mnemonicParsing="false">
+                                                            <graphic>
+                                                                <Label text="Show Outline"/>
+                                                            </graphic>
+                                                        </CheckMenuItem>
+                                                        <SeparatorMenuItem mnemonicParsing="false"/>
+                                                        <MenuItem mnemonicParsing="false">
+                                                            <graphic>
+                                                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                                    <children>
+                                                                        <Spinner fx:id="outlineSpreadSpinner"
+                                                                                 editable="true" prefWidth="60.0">
+                                                                            <tooltip>
+                                                                                <Tooltip text="Set spread of trees"/>
+                                                                            </tooltip>
+                                                                        </Spinner>
+                                                                        <Label text="Spread"/>
+                                                                    </children>
+                                                                </HBox>
+                                                            </graphic>
+                                                        </MenuItem>
+                                                        <SeparatorMenuItem mnemonicParsing="false"/>
+                                                        <CheckMenuItem fx:id="curvedReticulateEdgesCheckMenuItem2"
+                                                                       mnemonicParsing="false">
+                                                            <graphic>
+                                                                <Label text="Curved Reticulate Edges"/>
+                                                            </graphic>
+                                                        </CheckMenuItem>
+                                                        <CheckMenuItem fx:id="showTransferMenuItem2"
+                                                                       mnemonicParsing="false">
+                                                            <graphic>
+                                                                <Label text="Show Transfer Edges"/>
+                                                            </graphic>
+                                                        </CheckMenuItem>
+                                                        <MenuItem mnemonicParsing="false">
+                                                            <graphic>
+                                                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                                                    <children>
+                                                                        <Spinner fx:id="transferAcceptorPercentSpinner"
+                                                                                 editable="true" prefWidth="60.0">
+                                                                            <tooltip>
+                                                                                <Tooltip
+                                                                                        text="Percent trees on edge required for transfer acceptor edge"/>
+                                                                            </tooltip>
+                                                                        </Spinner>
+                                                                        <Label text="Min Percent"/>
+                                                                    </children>
+                                                                </HBox>
+                                                            </graphic>
+                                                        </MenuItem>
+                                                    </items>
+                                                </MenuButton>
                                                 <ComboBox fx:id="colorSchemeCBox" prefWidth="150.0"/>
-                                                <Button fx:id="zoomInButton" mnemonicParsing="false" text="Zoom In"/>
+                                                <Button fx:id="zoomInButton" mnemonicParsing="false" text="Outline"/>
                                                 <Button fx:id="zoomOutButton" layoutX="221.0" layoutY="10.0"
                                                         mnemonicParsing="false" text="Zoom Out"/>
                                             </items>
@@ -362,9 +401,13 @@
                                             <RadioMenuItem fx:id="radialPhylogramMenuItem" mnemonicParsing="false"
                                                            text="Radial Phylogram"/>
                                         </Menu>
-                                        <CheckMenuItem fx:id="reticulateEdgesAreSpecialCheckMenuItem"
+                                        <CheckMenuItem fx:id="showOutlineCheckMenuItem" mnemonicParsing="false"
+                                                       selected="true" text="Show Outline"/>
+                                        <CheckMenuItem fx:id="showTransferMenuItem" mnemonicParsing="false"
+                                                       text="Show Transfer Edges"/>
+                                        <CheckMenuItem fx:id="curvedReticulateEdgesCheckMenuItem"
                                                        mnemonicParsing="false" selected="true"
-                                                       text="Reticulate Edges Are Special"/>
+                                                       text="Curved Reticulate Edges"/>
                                     </items>
                                 </Menu>
                                 <Menu fx:id="windowMenu" mnemonicParsing="false" text="Window">

@@ -34,7 +34,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.StrokeLineCap;
-import jloda.fx.util.BasicFX;
 import jloda.fx.util.ProgramProperties;
 import jloda.fx.window.MainWindowManager;
 import jloda.graph.Edge;
@@ -67,15 +66,22 @@ public class NetworkView extends Group {
 	private final ObjectProperty<TreeDiagramType> optionDiagram = new SimpleObjectProperty<>(this, "optionDiagram", TreeDiagramType.RectangularCladogram);
 	private final ObjectProperty<Averaging> optionAveraging = new SimpleObjectProperty<>(this, "optionAveraging", Averaging.ChildAverage);
 	private final DoubleProperty optionOutlineWidth = new SimpleDoubleProperty(this, "optionOutlineWidth", 30.0);
-	private final BooleanProperty optionShowOutline = new SimpleBooleanProperty(this, "optionShowOutline", true);
+	private final BooleanProperty optionShowOutline = new SimpleBooleanProperty(this, "optionShowOutline", false);
+	private final DoubleProperty optionAcceptorPercentage = new SimpleDoubleProperty(this, "optionAcceptorPercentage", 75);
+	private final BooleanProperty optionShowTransfer = new SimpleBooleanProperty(this, "optionShowTransfer", false);
 
 	private final BooleanProperty optionRectangularEdges = new SimpleBooleanProperty(this, "optionRectangularEdges", false);
 	private final BooleanProperty optionReticulateEdgesAreSpecial = new SimpleBooleanProperty(this, "optionReticulateEdgesAreSpecial", true);
 
 	{
+		ProgramProperties.track(optionDiagram, TreeDiagramType::valueOf, TreeDiagramType.RectangularCladogram);
+		ProgramProperties.track(optionAveraging, Averaging::valueOf, Averaging.ChildAverage);
 		ProgramProperties.track(optionOutlineWidth, 30.0);
+		ProgramProperties.track(optionShowOutline, false);
+		ProgramProperties.track(optionAcceptorPercentage, 75.0);
+		ProgramProperties.track(optionShowTransfer, false);
+		ProgramProperties.track(optionReticulateEdgesAreSpecial, true);
 	}
-
 
 	private final DoubleProperty targetWidth = new SimpleDoubleProperty(this, "targetWidth", 800.0);
 	private final DoubleProperty targetHeight = new SimpleDoubleProperty(this, "targetHeight", 800.0);
@@ -84,17 +90,17 @@ public class NetworkView extends Group {
 		this.service = new NetworkViewService(bottomPane);
 		this.legend = legend;
 
+		var lightEffect = new DropShadow(BlurType.THREE_PASS_BOX, Color.LIGHTGRAY, 0.3, 0.9, 0.0, 0.0);
+
+		var darkEffect = new DropShadow(BlurType.THREE_PASS_BOX, Color.DARKGRAY, 0.3, 0.9, 0.0, 0.0);
+
 		optionShowOutline.addListener((v, o, n) -> {
-			outlinesGroup.setEffect(n ? new DropShadow(BlurType.THREE_PASS_BOX, MainWindowManager.isUseDarkTheme() ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0) : null);
+			outlinesGroup.setEffect(n ? (MainWindowManager.isUseDarkTheme() ? darkEffect : lightEffect) : null);
 		});
-		outlinesGroup.setEffect(optionShowOutline.get() ? new DropShadow(BlurType.THREE_PASS_BOX, MainWindowManager.isUseDarkTheme() ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0) : null);
+		outlinesGroup.setEffect(isOptionShowOutline() ? (MainWindowManager.isUseDarkTheme() ? darkEffect : lightEffect) : null);
 
 		MainWindowManager.useDarkThemeProperty().addListener((v, o, n) -> {
-			if (optionShowOutline.get())
-				outlinesGroup.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, n ? Color.WHITE : Color.BLACK, 1, 0.5, 0.0, 0.0));
-			for (var shape : BasicFX.getAllRecursively(outlinesGroup, Path.class)) {
-				shape.setStroke(n ? Color.WHITE : Color.BLACK);
-			}
+			outlinesGroup.setEffect(isOptionShowOutline() ? (n ? darkEffect : lightEffect) : null);
 		});
 
 		getChildren().addAll(networkGroup, tracedTreesGroup);
@@ -118,11 +124,15 @@ public class NetworkView extends Group {
 			clear();
 			var width = scaleFactor * Math.max(400, getTargetWidth() - 200);
 			var height = scaleFactor * Math.max(400, getTargetHeight() - 50);
-			service.setup(taxaBlock, network, getOptionDiagram(), getOptionAveraging(), width, height, optionReticulateEdgesAreSpecial.get());
+			service.setup(taxaBlock, network, getOptionDiagram(), getOptionAveraging(), width, height, optionReticulateEdgesAreSpecial.get(), getApplicableAcceptorPercentage());
 			service.setOnSucceeded(a -> {
 				var result = service.getValue();
+				var labelsGroup = result.taxonLabels();
+				var all = result.getAllAsGroup();
+				all.getChildren().remove(labelsGroup);
 				networkGroup.getChildren().setAll(result.getAllAsGroup());
 				networkGroup.getChildren().add(outlinesGroup);
+				networkGroup.getChildren().add(labelsGroup); // want labels on top of outline
 				nodeLabeledNodeShapeMap.clear();
 				nodeLabeledNodeShapeMap.putAll(service.getNodeLabeledNodeShapeMap());
 				// put space in front and end of labels:
@@ -153,7 +163,6 @@ public class NetworkView extends Group {
 				var edgeShape = entry.getValue();
 				if (!edgeOutlineMap.containsKey(e) && edgeShape.getShape() instanceof Path path) {
 					var outline = PathUtils.copy(path);
-					outline.getStyleClass().remove("graph-edge");
 					if (e.getSource().getInDegree() == 0 || e.getTarget().getOutDegree() == 0)
 						outline.setStrokeLineCap(StrokeLineCap.SQUARE);
 					else
@@ -214,6 +223,18 @@ public class NetworkView extends Group {
 
 	public DoubleProperty optionOutlineWidthProperty() {
 		return optionOutlineWidth;
+	}
+
+	public DoubleProperty optionAcceptorPercentageProperty() {
+		return optionAcceptorPercentage;
+	}
+
+	public double getApplicableAcceptorPercentage() {
+		return optionShowTransfer.get() ? optionAcceptorPercentage.get() : 100.0;
+	}
+
+	public BooleanProperty optionShowTransferProperty() {
+		return optionShowTransfer;
 	}
 
 	public boolean isOptionShowOutline() {

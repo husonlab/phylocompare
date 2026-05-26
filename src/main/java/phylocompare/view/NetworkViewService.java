@@ -37,6 +37,8 @@ import splitstree6.layout.tree.TreeDiagramType;
 import java.util.HashMap;
 import java.util.Map;
 
+import static phylocompare.trace.TreeTrace.getTT;
+
 public class NetworkViewService extends AService<ComputeTreeLayout.Result> {
 	private final Map<Node, LabeledNodeShape> nodeLabeledNodeShapeMap = new HashMap<>();
 	private final Map<Edge, LabeledEdgeShape> edgeLabeledEdgeShapeHashMap = new HashMap<>();
@@ -46,9 +48,18 @@ public class NetworkViewService extends AService<ComputeTreeLayout.Result> {
 	}
 
 	public void setup(TaxaBlock taxaBlock, PhyloTree network, TreeDiagramType diagram,
-					  Averaging averaging, double width, double height, boolean reticulateEdgesAreSpecial) {
+					  Averaging averaging, double width, double height, boolean reticulateEdgesAreSpecial, double transferAcceptorPercentage) {
 		setCallable(() -> {
 			getProgressListener().setTasks("Computing", "layout");
+
+			network.clearTransferAcceptorEdges();
+			if (transferAcceptorPercentage < 100.0) {
+				network.nodeStream().filter(v -> v.getInDegree() >= 2).forEach(v -> {
+					var threshold = (transferAcceptorPercentage / 100.0) * v.inEdgesStream(true).mapToInt(e -> getTT(e).cardinality()).sum();
+					v.inEdgesStream(true).filter(e -> getTT(e).cardinality() > threshold).findAny().ifPresent(e -> network.setTransferAcceptor(e, true));
+				});
+			}
+
 			var taxonLabelMap = new HashMap<Integer, StringProperty>();
 			for (var t = 1; t <= taxaBlock.getNtax(); t++) {
 				taxonLabelMap.put(t, new SimpleStringProperty(taxaBlock.getLabel(t)));

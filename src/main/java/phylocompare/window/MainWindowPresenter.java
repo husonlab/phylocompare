@@ -32,7 +32,6 @@ import javafx.stage.FileChooser;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.dialog.ExportImageDialog;
 import jloda.fx.dialog.SetParameterInternalDialog;
-import jloda.fx.icons.MaterialIcons;
 import jloda.fx.util.*;
 import jloda.fx.window.MainWindowManager;
 import jloda.fx.window.SplashScreen;
@@ -80,7 +79,6 @@ public class MainWindowPresenter {
 		var undoManager = window.getUndoManager();
 
 		var confidenceThreshold = document.confidenceThresholdProperty();
-		ProgramProperties.track(confidenceThreshold, 70.0);
 
 		var scaleFactor = new SimpleDoubleProperty(this, "scaleFactor", 1.0);
 
@@ -98,7 +96,7 @@ public class MainWindowPresenter {
 				confidenceThreshold.set(value);
 			}
 		});
-		controller.getConfidenceTextField().setText(StringUtils.removeTrailingZerosAfterDot(confidenceThreshold.get()));
+		controller.getConfidenceTextField().setText(StringUtils.trim(confidenceThreshold.get()));
 		controller.getConfidenceTextField().disableProperty().bind(document.hasTreeConfidencesProperty().not().or(canRun.not()));
 
 		confidenceThreshold.addListener(e -> controller.getRunMenuItem().fire());
@@ -155,8 +153,22 @@ public class MainWindowPresenter {
 		});
 		controller.getRunMenuItem().disableProperty().bind(algorithmsService.runningProperty().or(document.hasTreesProperty().not()));
 
-		DoubleSpinnerBinder.setupAndBind(controller.getOutlineWidthSpinner(), networkView.optionOutlineWidthProperty(), 0, 100, networkView.getOptionOutlineWidth(), 1);
-		controller.getOutlineWidthSpinner().disableProperty().bind(canShowNetwork.not());
+		DoubleSpinnerBinder.setupAndBind(controller.getOutlineSpreadSpinner(), networkView.optionOutlineWidthProperty(), 0, 100, networkView.getOptionOutlineWidth(), 1);
+
+		DoubleSpinnerBinder.setupAndBind(controller.getTransferAcceptorPercentSpinner(), networkView.optionAcceptorPercentageProperty(), 50, 100, networkView.getOptionOutlineWidth(), 1);
+
+		controller.getShowTransferMenuItem().selectedProperty().bindBidirectional(networkView.optionShowTransferProperty());
+
+		networkView.optionAcceptorPercentageProperty().addListener((v, o, n) -> {
+			undoManager.add("transfer acceptor percent", networkView.optionAcceptorPercentageProperty(), o, n);
+			runUpdateNetworkDrawing();
+		});
+		networkView.optionShowTransferProperty().addListener(e -> runUpdateNetworkDrawing());
+
+		networkView.optionShowTransferProperty().addListener((v, o, n) -> {
+			undoManager.add("show transfers", networkView.optionShowTransferProperty(), o, n);
+			runUpdateNetworkDrawing();
+		});
 
 		networkView.optionOutlineWidthProperty().addListener((v, o, n) -> {
 			runUpdateNetworkDrawing();
@@ -173,22 +185,16 @@ public class MainWindowPresenter {
 		networkView.optionShowOutlineProperty().addListener((v, o, n) -> {
 			undoManager.add("outline", networkView.optionShowOutlineProperty(), o, n);
 		});
-		networkView.optionShowOutlineProperty().bindBidirectional(controller.getOutlineToggleButton().selectedProperty());
-		controller.getOutlineToggleButton().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 
-		networkView.optionReticulateEdgesAreSpecialProperty().bindBidirectional(controller.getReticulateEdgesAreSpecialCheckMenuItem().selectedProperty());
-		networkView.optionReticulateEdgesAreSpecialProperty().addListener((v, o, n) -> {
-			if (n)
-				MaterialIcons.setIcon(controller.getReticulateEdgesAreSpecialButton(), MaterialIcons.redo, "-fx-scale-y: -1;", true);
-			else
-				MaterialIcons.setIcon(controller.getReticulateEdgesAreSpecialButton(), MaterialIcons.keyboard_return, "-fx-scale-x: -1;-fx-scale-y: -1;", true);
+		controller.getShowOutlineCheckMenuItem().selectedProperty().bindBidirectional(networkView.optionShowOutlineProperty());
+
+		networkView.optionReticulateEdgesAreSpecialProperty().addListener(e -> {
 			if (document.hasNetworks())
 				runUpdateNetworkDrawing();
 		});
-		controller.getReticulateEdgesAreSpecialCheckMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
+		controller.getCurvedReticulateEdgesCheckMenuItem().selectedProperty().addListener((v, o, n) ->
+				undoManager.doAndAdd("special edges", networkView.optionReticulateEdgesAreSpecialProperty(), o, n));
 
-		controller.getReticulateEdgesAreSpecialButton().setOnAction(e -> networkView.optionReticulateEdgesAreSpecialProperty().set(!networkView.optionReticulateEdgesAreSpecialProperty().get()));
-		controller.getReticulateEdgesAreSpecialButton().disableProperty().bind(controller.getReticulateEdgesAreSpecialCheckMenuItem().disableProperty());
 		controller.getRootPane().widthProperty().addListener(e -> runUpdateNetworkDrawing());
 		controller.getRootPane().heightProperty().addListener(e -> runUpdateNetworkDrawing());
 
@@ -342,19 +348,13 @@ public class MainWindowPresenter {
 
 		{
 			controller.getRectangularCladogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.RectangularCladogram));
-			controller.getRectangularCladogramMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 			controller.getRectangularPhylogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.RectangularPhylogram));
-			controller.getRectangularPhylogramMenuItem().disableProperty().bind(controller.getRectangularCladogramMenuItem().disableProperty().or(document.hasNetworksProperty().not()));
 
 			controller.getCircularCladogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.CircularCladogram));
-			controller.getCircularCladogramMenuItem().disableProperty().bind(controller.getRectangularCladogramMenuItem().disableProperty());
 			controller.getCircularPhylogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.CircularPhylogram));
-			controller.getCircularPhylogramMenuItem().disableProperty().bind(controller.getRectangularPhylogramMenuItem().disableProperty());
 
 			controller.getRadialCladogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.RadialCladogram));
-			controller.getRadialCladogramMenuItem().disableProperty().bind(controller.getRectangularCladogramMenuItem().disableProperty());
 			controller.getRadialPhylogramMenuItem().setOnAction(e -> networkView.setOptionDiagram(TreeDiagramType.RadialPhylogram));
-			controller.getRadialPhylogramMenuItem().disableProperty().bind(controller.getRectangularPhylogramMenuItem().disableProperty());
 
 			var menuButton = controller.getDiagramMenuButton();
 			menuButton.setPrefWidth(50);
@@ -369,7 +369,6 @@ public class MainWindowPresenter {
 				networkView.optionDiagramProperty().addListener((v, o, n) -> {
 					radioButton.setSelected(n == diagramType);
 				});
-				radioButton.disableProperty().bind(menuButton.disableProperty());
 				menuButton.getItems().add(radioButton);
 			}
 
@@ -379,7 +378,6 @@ public class MainWindowPresenter {
 			});
 			if (networkView.getOptionDiagram() != null)
 				menuButton.setGraphic(networkView.getOptionDiagram().icon());
-			menuButton.disableProperty().bind(document.hasNetworksProperty().not().or(algorithmsService.runningProperty()));
 		}
 
 		controller.getCloseMenuItem().setOnAction(e -> {
