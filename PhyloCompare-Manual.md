@@ -253,8 +253,8 @@ parallelogram.
 
 If you use PhyloCompare in published work, please cite:
 
-> Huson, D. H., B. Cetinkaya and L. Zhang ..., *Phylogenetic Parallelograms: A Novel Method for Visually Comparing
-Phylogenetic Trees*, manuscript in preparation.
+> Huson, D. H., B. Cetinkaya and L. Zhang ..., *Visualizing agreement and conflict among phylogenetic trees with
+PhyloCompare*, manuscript in preparation.
 
 and the underlying PhyloFusion paper:
 
