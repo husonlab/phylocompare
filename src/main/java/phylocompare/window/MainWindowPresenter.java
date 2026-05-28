@@ -32,6 +32,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import jloda.fx.control.RichTextLabel;
 import jloda.fx.dialog.ExportImageDialog;
+import jloda.fx.dialog.SetParameterDialog;
 import jloda.fx.dialog.SetParameterInternalDialog;
 import jloda.fx.util.*;
 import jloda.fx.window.MainWindowManager;
@@ -600,6 +601,20 @@ public class MainWindowPresenter {
 			}
 		});
 
+		controller.getSetWindowSizeMenuItem().setOnAction(e -> {
+			var result = SetParameterDialog.apply(window.getStage(), "Enter size (width x height)",
+					"%.0f x %.0f".formatted(window.getStage().getWidth(), window.getStage().getHeight()));
+
+			if (result != null) {
+				var tokens = StringUtils.split(result, 'x');
+				if (tokens.length == 2 && NumberUtils.isInteger(tokens[0]) && NumberUtils.isInteger(tokens[1])) {
+					var width = Math.max(50, NumberUtils.parseDouble(tokens[0]));
+					var height = Math.max(50, NumberUtils.parseDouble(tokens[1]));
+					window.getStage().setWidth(width);
+					window.getStage().setHeight(height);
+				}
+			}
+		});
 	}
 
 	public static Collection<TreeRecord> getSelectedRowsOrAll(TableView<TreeRecord> treeTableView, List<TreeRecord> treeRecords) {

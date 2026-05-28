@@ -3,6 +3,7 @@
 PhyloCompare is an interactive desktop application for comparing phylogenetic trees using
 phylogenetic parallelograms.
 
+Open source repository: https://github.com/husonlab/phylocompare
 ## Documentation
 
 - User Manual
