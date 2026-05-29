@@ -262,6 +262,11 @@ and the underlying PhyloFusion paper:
 > Phylogenetic Networks, Systematic Biology, 75(1):88-99,
 > 2026 [https://doi.org/10.1093/sysbio/syaf049](https://doi.org/10.1093/sysbio/syaf049)
 
+This is the paper that describes how the layout of the underlying network is computed:
+
+> Huson DH (2025) Sketch, capture and layout phylogenies. PLOS Computational Biology 21(12):
+> e1013805. https://doi.org/10.1371/journal.pcbi.1013805
+
 ## 10. License
 
 PhyloCompare is released under the **GNU General Public License, version 3 or later** (GPL-3.0-or-later). See
