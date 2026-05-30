@@ -8,7 +8,7 @@ PhyloCompare is an interactive desktop application for comparing rooted phylogen
 visualization techniques that make it easier to identify common structure and topological disagreement among multiple
 trees derived from different genes, loci, chromosomes, or inference methods.
 
-PhyloCompare supports both traditional tanglegrams and a new visualization called a phylogenetic parallelogram, in which
+PhyloCompare provides a new visualization called a phylogenetic parallelogram, in which
 multiple trees are embedded into a common rooted network and drawn in parallel. This highlights shared evolutionary
 structure while making conflicting signals immediately visible.
 
