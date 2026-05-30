@@ -1,4 +1,4 @@
-# PhyloCompare
+hi# PhyloCompare
 
 <div style="text-align:center;">
   <img src="docs/images/parallelogram.png" width="600" alt="Example of a parallelogram">
@@ -69,7 +69,7 @@ The complete user manual is available here:
 
 If you use PhyloCompare in your research, please cite:
 
-Daniel H. Huson, Banu Cetinkaya and Louxin Zhang. PhyloCompare: interactive comparison of rooted phylogenetic trees using phylogenetic parallelograms. (Manuscript in preparation).
+Daniel H. Huson, Banu Cetinkaya and Louxin Zhang. Visualizing agreement and conflict among phylogenetic trees with PhyloCompare. (Manuscript in preparation).
 
 ## License
 
