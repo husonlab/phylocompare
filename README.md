@@ -69,8 +69,7 @@ The complete user manual is available here:
 
 If you use PhyloCompare in your research, please cite:
 
-Daniel H. Huson, Banu Cetinkaya and Louxin Zhang. PhyloCompare: interactive comparison of rooted phylogenetic trees using phylogenetic parallelograms. (
-citation details to be added).
+Daniel H. Huson, Banu Cetinkaya and Louxin Zhang. PhyloCompare: interactive comparison of rooted phylogenetic trees using phylogenetic parallelograms. (Manuscript in preparation).
 
 ## License
 
