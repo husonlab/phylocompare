@@ -65,7 +65,7 @@ The portable archive can be unpacked and run without administrator privileges.
 
 The complete user manual is available here:
 
-[User Manual](docs/Manual)
+[User Manual](docs/manual)
 
 ## Citation
 
