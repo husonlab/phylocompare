@@ -515,12 +515,8 @@
                                             </accelerator>
 
                                         </MenuItem>
-                                        <MenuItem fx:id="zoomToFitMenuItem" text="Zoom To Fit">
-                                            <accelerator>
-                                                <KeyCodeCombination alt="UP" code="PERIOD" control="UP" meta="UP"
-                                                                    shift="UP" shortcut="DOWN"/>
-                                            </accelerator>
-                                        </MenuItem>
+                                        <CheckMenuItem fx:id="flipVerticallyCheckMenuItem" mnemonicParsing="false"
+                                                       text="Flip Vertically"/>
 
                                         <SeparatorMenuItem mnemonicParsing="false"/>
                                         <MenuItem fx:id="zoomInHorizontallyMenuItem" text="Zoom In Horizontally">
@@ -533,6 +529,12 @@
                                             <accelerator>
                                                 <KeyCodeCombination alt="UP" code="DOWN" control="UP" meta="UP"
                                                                     shift="DOWN" shortcut="DOWN"/>
+                                            </accelerator>
+                                        </MenuItem>
+                                        <MenuItem fx:id="zoomToFitMenuItem" text="Zoom To Fit">
+                                            <accelerator>
+                                                <KeyCodeCombination alt="UP" code="PERIOD" control="UP" meta="UP"
+                                                                    shift="UP" shortcut="DOWN"/>
                                             </accelerator>
                                         </MenuItem>
 

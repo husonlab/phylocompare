@@ -51,6 +51,7 @@ public class PhyloParallelograms extends Application {
         Runtime.getRuntime().addShutdownHook(new Thread(ProgramProperties::store));
         ProgramProperties.setUseGUI(true);
         CreateEdges.ALLOW_ARROW_HEADS = false;
+        ProgramProperties.setHostServices(getHostServices());
     }
 
     /**

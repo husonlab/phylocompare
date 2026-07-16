@@ -29,7 +29,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Group;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -40,6 +39,7 @@ import jloda.fx.dialog.ConfirmInternalDialog;
 import jloda.fx.dialog.ExportImageDialog;
 import jloda.fx.dialog.SetParameterDialog;
 import jloda.fx.dialog.SetParameterInternalDialog;
+import jloda.fx.icons.MaterialIcons;
 import jloda.fx.service.UpdateService;
 import jloda.fx.util.*;
 import jloda.fx.window.MainWindowManager;
@@ -67,12 +67,10 @@ import splitstree6.data.parts.Taxon;
 import splitstree6.layout.tree.TreeDiagramType;
 import splitstree6.view.format.taxlabel.TaxonLabelFormat;
 
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -440,6 +438,14 @@ public class MainWindowPresenter {
 					radioButton.setSelected(n == diagramType);
 				});
 				menuButton.getItems().add(radioButton);
+				if (networkView.getOptionDiagram().equals(diagramType))
+					radioButton.setSelected(true);
+			}
+			{
+				var checkMenuItem = BasicFX.copyMenu(List.of(controller.getFlipVerticallyMenuItem()), false).get(0);
+				checkMenuItem.setText("");
+				checkMenuItem.setGraphic(MaterialIcons.graphic(MaterialIcons.swap_vert));
+				menuButton.getItems().addAll(new SeparatorMenuItem(), checkMenuItem);
 			}
 
 			networkView.optionDiagramProperty().addListener((v, o, n) -> {
@@ -504,6 +510,18 @@ public class MainWindowPresenter {
 			var group = BasicFX.getAllRecursively(networkView, Group.class).iterator().next();
 			var scaleBy = n.doubleValue() / o.doubleValue();
 			ScaleDrawing.apply(group, 1, scaleBy);
+		});
+
+		networkView.optionFlipVerticallyProperty().addListener(e -> {
+					networkView.applyVerticalFlip();
+					runUpdateTreesDrawing();
+				}
+		);
+		controller.getFlipVerticallyMenuItem().selectedProperty().bindBidirectional(networkView.optionFlipVerticallyProperty());
+		controller.getFlipVerticallyMenuItem().disableProperty().bind(serviceRunning.or(Bindings.createBooleanBinding(() -> networkView.getOptionDiagram().isRadialOrCircular(), networkView.optionDiagramProperty())));
+		networkView.optionDiagramProperty().addListener((v, o, n) -> {
+			if (n != null && n.isRadialOrCircular())
+				networkView.optionFlipVerticallyProperty().set(false);
 		});
 
 		controller.getIncreaseFontSizeMenuItem().setOnAction(e -> {
@@ -732,13 +750,7 @@ public class MainWindowPresenter {
 			runUpdateTreesDrawing();
 		});
 
-		controller.getOpenOnlineUserManualInBrowserMenuItem().setOnAction(e -> {
-			try {
-				Desktop.getDesktop().browse(new URI(Version.WEBSITE_URL));
-			} catch (Exception ex) {
-				WindowNotifications.showInfo(controller.getCenterPane(), "Open Online User Manual failed: " + ex.getMessage());
-			}
-		});
+		controller.getOpenOnlineUserManualInBrowserMenuItem().setOnAction(e -> ProgramProperties.getHostServices().showDocument(Version.WEBSITE_URL));
 
 		controller.getSetWindowSizeMenuItem().setOnAction(e -> {
 			var result = SetParameterDialog.apply(window.getStage(), "Enter size (width x height)",

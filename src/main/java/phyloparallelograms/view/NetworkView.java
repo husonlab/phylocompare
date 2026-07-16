@@ -29,6 +29,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.collections.SetChangeListener;
 import javafx.event.Event;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
@@ -71,6 +72,7 @@ public class NetworkView extends Group {
 	private final Map<Edge, LabeledEdgeShape> edgeLabeledEdgeShapeHashMap = new HashMap<>();
 
 	private final ObjectProperty<TreeDiagramType> optionDiagram = new SimpleObjectProperty<>(this, "optionDiagram", TreeDiagramType.RectangularCladogram);
+	private final BooleanProperty optionFlipVertically = new SimpleBooleanProperty(this, "optionFlipVertically", false);
 	private final ObjectProperty<Averaging> optionAveraging = new SimpleObjectProperty<>(this, "optionAveraging", Averaging.ChildAverage);
 	private final ObjectProperty<LayoutRootedPhylogeny.Scaling> optionScaling = new SimpleObjectProperty<>(this, "optionScaling", LayoutRootedPhylogeny.Scaling.LateBranching);
 	private final DoubleProperty optionOutlineWidth = new SimpleDoubleProperty(this, "optionOutlineWidth", 30.0);
@@ -199,6 +201,11 @@ public class NetworkView extends Group {
 
 				edgeLabeledEdgeShapeHashMap.clear();
 				edgeLabeledEdgeShapeHashMap.putAll(service.getEdgeLabeledEdgeShapeHashMap());
+
+				if (getOptionFlipVertically() && !getOptionDiagram().isRadialOrCircular()) {
+					applyVerticalFlip();
+				}
+
 				drawOutline(getOptionOutlineWidth());
 
 				if (updateTreesDrawing) {
@@ -308,6 +315,14 @@ public class NetworkView extends Group {
 		return optionShowOutline;
 	}
 
+	public boolean getOptionFlipVertically() {
+		return optionFlipVertically.get();
+	}
+
+	public BooleanProperty optionFlipVerticallyProperty() {
+		return optionFlipVertically;
+	}
+
 	public double getTargetWidth() {
 		return targetWidth.get();
 	}
@@ -346,6 +361,16 @@ public class NetworkView extends Group {
 
 	public Map<Node, LabeledNodeShape> getNodeLabeledNodeShapeMap() {
 		return nodeLabeledNodeShapeMap;
+	}
+
+	public Map<Edge, LabeledEdgeShape> getEdgeLabeledEdgeShapeHashMap() {
+		return edgeLabeledEdgeShapeHashMap;
+	}
+
+	public void applyVerticalFlip() {
+		var shapes = getNodeLabeledNodeShapeMap().values();
+		var paths = getEdgeLabeledEdgeShapeHashMap().values().stream().map(es -> (Path) es.getShape()).toList();
+		TransformNodesEdges.apply(shapes, paths, (x, y) -> new Point2D(x, -y));
 	}
 }
 

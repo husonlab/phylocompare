@@ -182,6 +182,9 @@ public class MainWindowController {
 	private MenuItem openOnlineUserManualInBrowserMenuItem;
 
 	@FXML
+	private CheckMenuItem flipVerticallyCheckMenuItem;
+
+	@FXML
 	private TableView<TreeRecord> treeTable;
 
 	@FXML
@@ -881,5 +884,9 @@ public class MainWindowController {
 
 	public MenuItem getZoomOutHorizontallyMenuItem() {
 		return zoomOutHorizontallyMenuItem;
+	}
+
+	public CheckMenuItem getFlipVerticallyMenuItem() {
+		return flipVerticallyCheckMenuItem;
 	}
 }

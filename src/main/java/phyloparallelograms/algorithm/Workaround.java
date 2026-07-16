@@ -56,7 +56,7 @@ public class Workaround {
 
 	public static void applyTreeRenumberMapping(Map<Integer, Integer> treeRenumberMapping, PhyloTree network) {
 		var allInputTrees = treeRenumberMapping.keySet();
-		var allTraceTrees = BitSetUtils.union(network.nodeStream().map(TreeTrace::getTT).toList());
+		var allTraceTrees = BitSetUtils.union(network.nodeStream().filter(v -> TreeTrace.getTT(v) != null).map(TreeTrace::getTT).toList());
 
 		if (!allInputTrees.equals(allTraceTrees)) {
 			for (var v : network.nodes()) {
