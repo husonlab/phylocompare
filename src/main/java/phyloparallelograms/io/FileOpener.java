@@ -56,13 +56,7 @@ public class FileOpener implements Consumer<String> {
 	public void accept(String fileName, MainWindow window) {
 		try {
 			if (SQLiteUtils.isSQLiteWithTreesOrNetworksTable(fileName)) {
-				var parameters = PhyloParallelogramsDB.load(fileName, window.getDocument());
-				if (parameters != null) {
-					if (parameters.confidenceThreshold() >= 0)
-						window.getDocument().confidenceThresholdProperty().set(parameters.confidenceThreshold());
-					if (parameters.outlineWidth() > 0)
-						window.getPresenter().getNetworkView().optionOutlineWidthProperty().set(parameters.outlineWidth());
-				}
+				PhyloParallelogramsDB.load(fileName, window.getDocument(), window.getOptionsRegistry());
 			} else {
 				var firstLine = Objects.requireNonNull(FileUtils.getFirstLineFromFile(new File(fileName))).trim().toLowerCase();
 				if (firstLine.startsWith("#nexus")) {

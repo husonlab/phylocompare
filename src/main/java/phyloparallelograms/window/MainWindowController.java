@@ -246,12 +246,12 @@ public class MainWindowController {
 
 
 	@FXML
-	private TextField confidenceTextField;
+	private Spinner<Double> confidenceSpinner;
 
 	@FXML
 	private Label confidenceLabel;
 	@FXML
-	private TextField concordanceTextField;
+	private Spinner<Double> concordanceSpinner;
 
 	@FXML
 	private Label concordanceLabel;
@@ -401,14 +401,6 @@ public class MainWindowController {
 			//editMenu.getItems().remove(getPreferencesMenuItem());
 		}
 
-		confidenceTextField.setTextFormatter(new TextFormatter<>(change ->
-				change.getControlNewText().matches("-?\\d*(\\.\\d*)?") ? change : null));
-		confidenceTextField.setText("0.0");
-
-		concordanceTextField.setTextFormatter(new TextFormatter<>(change ->
-				change.getControlNewText().matches("-?\\d*(\\.\\d*)?") ? change : null));
-		confidenceTextField.setText("0.0");
-
 		statusLabel.setText("");
 
 		scrollPane = new ZoomableScrollPane(new Pane());
@@ -484,8 +476,8 @@ public class MainWindowController {
 		taxonLabelsTitledPane.visibleProperty().bind(formatToggleButton.selectedProperty());
 		taxonLabelsTitledPane.managedProperty().bind(formatToggleButton.selectedProperty());
 
-		confidenceLabel.disableProperty().bind(confidenceTextField.disabledProperty());
-		concordanceLabel.disableProperty().bind(concordanceTextField.disabledProperty());
+		confidenceLabel.disableProperty().bind(confidenceSpinner.disabledProperty());
+		concordanceLabel.disableProperty().bind(concordanceSpinner.disabledProperty());
 
 		sideBarCheckMenuItem.setSelected(true);
 		sideBarCheckMenuItem.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
@@ -718,12 +710,12 @@ public class MainWindowController {
 		return showSelectedMenuItem;
 	}
 
-	public TextField getConfidenceTextField() {
-		return confidenceTextField;
+	public Spinner<Double> getConfidenceSpinner() {
+		return confidenceSpinner;
 	}
 
-	public TextField getConcordanceTextField() {
-		return concordanceTextField;
+	public Spinner<Double> getConcordanceSpinner() {
+		return concordanceSpinner;
 	}
 
 	public Label getStatusLabel() {

@@ -20,14 +20,13 @@
 
 package phyloparallelograms.io;
 
-import jloda.fx.util.ColorSchemeManager;
+import jloda.fx.options.OptionsRegistry;
+import jloda.fx.options.OptionsSQL;
 import jloda.fx.util.ColorUtilsFX;
 import jloda.phylo.CommentData;
 import jloda.phylo.NewickIO;
 import jloda.phylo.PhyloTree;
 import jloda.util.FileUtils;
-import jloda.util.NumberUtils;
-import jloda.util.StringUtils;
 import phyloparallelograms.model.Document;
 import phyloparallelograms.window.TreeRecord;
 import splitstree6.data.TaxaBlock;
@@ -43,7 +42,7 @@ import java.util.TreeMap;
 public class PhyloParallelogramsDB {
 
 	public static void save(String fileName, List<TreeRecord> treeRecords, List<PhyloTree> networks,
-							TaxaBlock taxaBlock, Parameters parameters) throws IOException {
+							TaxaBlock taxaBlock, OptionsRegistry options) throws IOException {
 		var url = "jdbc:sqlite:" + fileName;
 
 		try (var conn = DriverManager.getConnection(url)) {
@@ -73,14 +72,6 @@ public class PhyloParallelogramsDB {
 							""");
 
 					stmt.execute("""
-								CREATE TABLE IF NOT EXISTS parameters (
-									name   TEXT PRIMARY KEY,
-									type   TEXT NOT NULL,
-									value  TEXT
-								);
-							""");
-
-					stmt.execute("""
 								CREATE TABLE IF NOT EXISTS taxa (
 									id      INTEGER PRIMARY KEY,
 									name   TEXT NOT NULL,
@@ -91,7 +82,6 @@ public class PhyloParallelogramsDB {
 					// Clear old contents
 					stmt.executeUpdate("DELETE FROM trees");
 					stmt.executeUpdate("DELETE FROM networks");
-					stmt.executeUpdate("DELETE FROM parameters");
 					stmt.executeUpdate("DELETE FROM taxa");
 				}
 
@@ -140,51 +130,7 @@ public class PhyloParallelogramsDB {
 					ps.executeBatch();
 				}
 
-				try (var ps = conn.prepareStatement("INSERT INTO parameters (name, type, value) VALUES (?, ?, ?)")) {
-					// todo: auto generate from parameters
-					{
-						ps.setString(1, "min_confidence");
-						ps.setString(2, "double");
-						ps.setString(3, StringUtils.trim(parameters.confidenceThreshold()));
-						ps.addBatch();
-					}
-					{
-						ps.setString(1, "min_concordance");
-						ps.setString(2, "double");
-						ps.setString(3, StringUtils.trim(parameters.concordanceThreshold()));
-						ps.addBatch();
-					}
-					{
-						ps.setString(1, "outline_width");
-						ps.setString(2, "double");
-						ps.setString(3, StringUtils.trim(parameters.outlineWidth()));
-						ps.addBatch();
-					}
-					{
-						ps.setString(1, "show_outline");
-						ps.setString(2, "boolean");
-						ps.setString(3, parameters.showOutline() ? "true" : "false");
-						ps.addBatch();
-					}
-					{
-						ps.setString(1, "color_scheme");
-						ps.setString(2, "string");
-						ps.setString(3, parameters.colorScheme());
-					}
-					{
-						ps.setString(1, "use_transfer");
-						ps.setString(2, "boolean");
-						ps.setString(3, parameters.useTransfer() ? "true" : "false");
-						ps.addBatch();
-					}
-					{
-						ps.setString(1, "acceptor_percentage");
-						ps.setString(2, "double");
-						ps.setString(3, String.valueOf(parameters.acceptorPercentage));
-						ps.addBatch();
-					}
-					ps.executeBatch();
-				}
+				OptionsSQL.save(conn, OptionsSQL.DEFAULT_TABLE, options);
 
 				conn.commit();
 			} catch (Exception e) {
@@ -198,7 +144,7 @@ public class PhyloParallelogramsDB {
 		}
 	}
 
-	public static Parameters load(String fileName, Document document) throws IOException {
+	public static void load(String fileName, Document document, OptionsRegistry options) throws IOException {
 		FileUtils.checkFileReadableNonEmpty(fileName);
 		if (!SQLiteUtils.isSQLiteWithTreesOrNetworksTable(fileName))
 			throw new IOException("Not a PhyloParallelograms file");
@@ -210,8 +156,6 @@ public class PhyloParallelogramsDB {
 		var treeRecords = new ArrayList<TreeRecord>();
 		var networks = new TreeMap<Integer, PhyloTree>();
 		var taxaBlock = new TaxaBlock();
-
-		Parameters result;
 
 		try (var conn = DriverManager.getConnection(url);
 			 var stmt = conn.createStatement()) {
@@ -281,39 +225,9 @@ public class PhyloParallelogramsDB {
 				}
 			}
 
-			try (var rs = stmt.executeQuery("SELECT name, type, value FROM parameters ORDER BY name")) {
-				var confidenceThreshold = -1.0;
-				var concordanceThreshold = -1.0;
-				var outlineWidth = -1.0;
-				var showOutline = true;
-				var colorScheme = document.getColorSchemeName();
-				var useTransfer = false;
-				var acceptorPercentage = 100.0;
-				while (rs.next()) {
-					var name = rs.getString("name");
-					var type = rs.getString("type");
-					var value = rs.getString("value");
-					if (type.equals("double") && NumberUtils.isDouble(value)) {
-						switch (name) {
-							case "confidence_threshold" -> confidenceThreshold = Double.parseDouble(value);
-							case "outline_width" -> outlineWidth = Double.parseDouble(value);
-							case "acceptor_percentage" -> acceptorPercentage = Double.parseDouble(value);
-						}
-					} else if (type.equals("boolean") && NumberUtils.isBoolean(value)) {
-						if (name.equals("show_outline")) {
-							showOutline = NumberUtils.parseBoolean(value);
-						} else if (name.equals("use_transfer")) {
-							useTransfer = NumberUtils.parseBoolean(value);
-						}
-					} else if (type.equals("string")) {
-						if (name.equals("color_scheme")) {
-							if (ColorSchemeManager.getInstance().getNames().contains(value))
-								colorScheme = value;
-						}
-					}
-				}
-				result = new Parameters(confidenceThreshold, concordanceThreshold, outlineWidth, showOutline, colorScheme, useTransfer, acceptorPercentage);
-			}
+			if (options != null && tableExists(conn, OptionsSQL.DEFAULT_TABLE))
+				OptionsSQL.load(conn, OptionsSQL.DEFAULT_TABLE, options);
+
 			if (!treeRecords.isEmpty())
 				document.addTreesAndNetworks(treeRecords, networks.values());
 			else if (!networks.isEmpty())
@@ -325,7 +239,6 @@ public class PhyloParallelogramsDB {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
-		return result;
 	}
 
 	private static boolean tableExists(Connection conn, String tableName) throws SQLException {
@@ -337,10 +250,5 @@ public class PhyloParallelogramsDB {
 				return rs.next(); // true if at least one row
 			}
 		}
-	}
-
-	public record Parameters(double confidenceThreshold, double concordanceThreshold, double outlineWidth,
-							 boolean showOutline, String colorScheme,
-							 boolean useTransfer, double acceptorPercentage) {
 	}
 }

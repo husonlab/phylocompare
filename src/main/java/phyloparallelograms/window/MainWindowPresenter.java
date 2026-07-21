@@ -40,6 +40,8 @@ import jloda.fx.dialog.ExportImageDialog;
 import jloda.fx.dialog.SetParameterDialog;
 import jloda.fx.dialog.SetParameterInternalDialog;
 import jloda.fx.icons.MaterialIcons;
+import jloda.fx.options.OptionControls;
+import jloda.fx.options.OptionsRegistry;
 import jloda.fx.service.UpdateService;
 import jloda.fx.util.*;
 import jloda.fx.window.MainWindowManager;
@@ -57,7 +59,6 @@ import phyloparallelograms.io.*;
 import phyloparallelograms.main.Version;
 import phyloparallelograms.trace.BruteForceTreeTracer;
 import phyloparallelograms.trace.TreeTrace;
-import phyloparallelograms.utils.DoubleSpinnerBinder;
 import phyloparallelograms.utils.SplitPaneSupport;
 import phyloparallelograms.view.Legend;
 import phyloparallelograms.view.NetworkView;
@@ -77,6 +78,11 @@ import java.util.Collection;
 import java.util.List;
 
 public class MainWindowPresenter {
+	/**
+	 * milliseconds to wait after the last change of a threshold before recomputing the network
+	 */
+	private static final long RECOMPUTE_DELAY = 500L;
+
 	private final MainWindow window;
 	private final Runnable updateNetworkDrawing;
 	private final Runnable updateTreesDrawing;
@@ -85,6 +91,7 @@ public class MainWindowPresenter {
 	private final RerootService rerootService;
 	private final RemoveTaxaService removeTaxaService;
 	private final NetworkView networkView;
+	private final OptionsRegistry optionsRegistry;
 
 	private final MainWindowController controller;
 	private final DoubleProperty scaleFactorX = new SimpleDoubleProperty(this, "scaleFactorX", 1.0);
@@ -98,8 +105,7 @@ public class MainWindowPresenter {
 		var undoManager = window.getUndoManager();
 
 		var confidenceThreshold = document.confidenceThresholdProperty();
-		var concordanceThreshold = document.confidenceThresholdProperty();
-
+		var concordanceThreshold = document.concordanceThresholdProperty();
 
 		SetupColorSchemes.apply(window);
 
@@ -107,45 +113,33 @@ public class MainWindowPresenter {
 
 		controller.getTreeTable().setItems(document.getTreeRecords());
 
-		controller.getConfidenceTextField().setOnAction(e -> {
-			var text = controller.getConfidenceTextField().getText();
-			if (NumberUtils.isDouble(text)) {
-				var value = Math.max(Double.parseDouble(text), 0.0);
-				confidenceThreshold.set(value);
-			}
-		});
-		controller.getConfidenceTextField().setText(StringUtils.trim(confidenceThreshold.get()));
-		controller.getConfidenceTextField().disableProperty().bind(document.hasTreeConfidencesProperty().not().or(canRun.not()));
-		confidenceThreshold.addListener(e -> runRecomputeNetwork());
+		networkView = new NetworkView(window.getTaxaSelectionModel(), (Pane) controller.getScrollPane().getContent(), controller.getBottomFlowPane(), new Legend(window, controller.getLegendVBox()));
+
+		optionsRegistry = OptionsRegistry.of(document, networkView);
+		// the set of color schemes is only known at runtime, so cannot be declared in the annotation:
+		optionsRegistry.setValidator("color_scheme_name", value -> ColorSchemeManager.getInstance().getNames().contains(value.toString()));
+
+		OptionControls.bindSpinner(controller.getConfidenceSpinner(), optionsRegistry.get("confidence_threshold"), 1);
+		controller.getConfidenceSpinner().disableProperty().bind(document.hasTreeConfidencesProperty().not().or(canRun.not()));
+		confidenceThreshold.addListener(e -> runRecomputeNetworkAfterAWhile());
 
 		controller.getSetConfidenceThresholdMenuItem().setOnAction(e -> {
-			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Confidence", "Set minimum edge confidence %", "0.0", s -> {
-				controller.getConfidenceTextField().setText(s);
-			});
+			var item = optionsRegistry.get("confidence_threshold");
+			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Confidence", OptionControls.tooltipText(item), item.getValueString(), item::setValueString);
 			dialog.show();
 		});
-		controller.getSetConfidenceThresholdMenuItem().disableProperty().bind(controller.getConfidenceTextField().disabledProperty());
+		controller.getSetConfidenceThresholdMenuItem().disableProperty().bind(controller.getConfidenceSpinner().disabledProperty());
 
-		controller.getConcordanceTextField().setOnAction(e -> {
-			var text = controller.getConcordanceTextField().getText();
-			if (NumberUtils.isDouble(text)) {
-				var value = Math.max(Double.parseDouble(text), 0.0);
-				concordanceThreshold.set(value);
-			}
-		});
-		controller.getConcordanceTextField().setText(StringUtils.trim(concordanceThreshold.get()));
-		controller.getConcordanceTextField().disableProperty().bind(canRun.not().or(Bindings.createBooleanBinding(() -> document.getRunTrees().size() < 5, document.updatedRunTreesProperty())));
-		concordanceThreshold.addListener(e -> runRecomputeNetwork());
+		OptionControls.bindSpinner(controller.getConcordanceSpinner(), optionsRegistry.get("concordance_threshold"), 1);
+		controller.getConcordanceSpinner().disableProperty().bind(canRun.not().or(Bindings.createBooleanBinding(() -> document.getRunTrees().size() < 5, document.updatedRunTreesProperty())));
+		concordanceThreshold.addListener(e -> runRecomputeNetworkAfterAWhile());
 
 		controller.getSetCondordanceThresholdMenuItem().setOnAction(e -> {
-			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Confidence", "Set min edge concordance %", "0.0", s -> {
-				controller.getConcordanceTextField().setText(s);
-			});
+			var item = optionsRegistry.get("concordance_threshold");
+			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Concordance", OptionControls.tooltipText(item), item.getValueString(), item::setValueString);
 			dialog.show();
 		});
-		controller.getSetCondordanceThresholdMenuItem().disableProperty().bind(controller.getConcordanceTextField().disabledProperty());
-
-		networkView = new NetworkView(window.getTaxaSelectionModel(), (Pane) controller.getScrollPane().getContent(), controller.getBottomFlowPane(), new Legend(window, controller.getLegendVBox()));
+		controller.getSetCondordanceThresholdMenuItem().disableProperty().bind(controller.getConcordanceSpinner().disabledProperty());
 
 		updateNetworkDrawing = () -> RunAfterAWhile.applyInFXThread("runUpdateNetworkDrawing", () -> {
 			if (document.getNetworks().isEmpty())
@@ -201,19 +195,15 @@ public class MainWindowPresenter {
 		});
 		controller.getRunMenuItem().disableProperty().bind(serviceRunning.or(document.hasTreesProperty().not()));
 
-		DoubleSpinnerBinder.setupAndBind(controller.getOutlineSpreadSpinner(), networkView.optionOutlineWidthProperty(), 0, 100, networkView.getOptionOutlineWidth(), 1);
+		OptionControls.bindSpinner(controller.getOutlineSpreadSpinner(), optionsRegistry.get("outline_width"), 1);
 
-		DoubleSpinnerBinder.setupAndBind(controller.getTransferAcceptorPercentSpinner(), networkView.optionAcceptorPercentageProperty(), 50, 100, networkView.getOptionOutlineWidth(), 1);
+		OptionControls.bindSpinner(controller.getTransferAcceptorPercentSpinner(), optionsRegistry.get("acceptor_percentage"), 1);
 
 		controller.getUseTransferMenuItem().selectedProperty().bindBidirectional(networkView.optionShowTransferProperty());
 
 		controller.getAcceptorPercentMenuItem().setOnAction(e -> {
-			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Transfer threshold", "Enter transfer acceptor min percent", "100.0", s -> {
-				if (NumberUtils.isDouble(s)) {
-					var value = Math.max(50, Math.min(100, NumberUtils.parseDouble(s)));
-					networkView.optionAcceptorPercentageProperty().set(value);
-				}
-			});
+			var item = optionsRegistry.get("acceptor_percentage");
+			var dialog = new SetParameterInternalDialog(controller.getCenterAnchorPane(), "Transfer threshold", OptionControls.tooltipText(item), item.getValueString(), item::setValueString);
 			dialog.show();
 		});
 		controller.getAcceptorPercentMenuItem().disableProperty().bind(controller.getUseTransferMenuItem().disableProperty());
@@ -804,6 +794,15 @@ public class MainWindowPresenter {
 		}
 	}
 
+	/**
+	 * schedules a recomputation of the network, restarting the delay each time this is called, so that
+	 * repeatedly pressing a spinner arrow, or holding it down, leads to only one recomputation, once
+	 * the user has stopped
+	 */
+	public void runRecomputeNetworkAfterAWhile() {
+		RunAfterAWhile.apply("runRecomputeNetwork", () -> Platform.runLater(this::runRecomputeNetwork), RECOMPUTE_DELAY);
+	}
+
 	public void runRecomputeNetwork() {
 		algorithmsService.setupCalculation(this.window, true);
 		algorithmsService.setOnScheduled(a -> {
@@ -835,5 +834,13 @@ public class MainWindowPresenter {
 
 	public NetworkView getNetworkView() {
 		return networkView;
+	}
+
+	/**
+	 * all options of this window that are to be saved and restored, and that drive the
+	 * tooltips and ranges of the associated controls
+	 */
+	public OptionsRegistry getOptionsRegistry() {
+		return optionsRegistry;
 	}
 }

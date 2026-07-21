@@ -102,19 +102,22 @@ public class DrawTracedTrees {
 				}
 
 				for (var treeId : BitSetUtils.members(use)) {
-					var path = PathUtils.copy(edgePathFunction.apply(e));
-					path.setEffect(null);
-					path.setStrokeWidth(1);
-					if (e.getTarget().getInDegree() > 1) {
-						var countIncoming = (int) e.getTarget().inEdgesStream(false)
-								.map(TreeTrace::getTT).filter(s -> s != null && s.get(treeId)).count();
-						path.setStroke(adjusted(treeColorMap.get(treeId), countIncoming));
-					} else
-						path.setStroke(treeColorMap.get(treeId));
+					var origPath = edgePathFunction.apply(e);
+					if (origPath != null) {
+						var path = PathUtils.copy(origPath);
+						path.setEffect(null);
+						path.setStrokeWidth(1);
+						if (e.getTarget().getInDegree() > 1) {
+							var countIncoming = (int) e.getTarget().inEdgesStream(false)
+									.map(TreeTrace::getTT).filter(s -> s != null && s.get(treeId)).count();
+							path.setStroke(adjusted(treeColorMap.get(treeId), countIncoming));
+						} else
+							path.setStroke(treeColorMap.get(treeId));
 
-					path.setTranslateX(treeOffsetMap.get(treeId));
-					path.setTranslateY(treeOffsetMap.get(treeId));
-					treeGroupMap.get(treeId).getChildren().add(path);
+						path.setTranslateX(treeOffsetMap.get(treeId));
+						path.setTranslateY(treeOffsetMap.get(treeId));
+						treeGroupMap.get(treeId).getChildren().add(path);
+					}
 				}
 			}
 		}

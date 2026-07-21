@@ -24,7 +24,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1"
+<AnchorPane fx:id="rootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="phyloparallelograms.window.MainWindowController">
     <children>
         <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -75,12 +75,8 @@
                                                     <children>
                                                         <Label fx:id="confidenceLabel" minWidth="30.0"
                                                                text="Min branch confidence (%):"/>
-                                                        <TextField fx:id="confidenceTextField" maxWidth="60.0">
-                                                            <tooltip>
-                                                                <Tooltip
-                                                                        text="Minimum  confidence for input branch filtering"/>
-                                                            </tooltip>
-                                                        </TextField>
+                                                        <Spinner fx:id="confidenceSpinner" editable="true"
+                                                                 prefWidth="60.0"/>
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
@@ -90,12 +86,8 @@
                                                     <children>
                                                         <Label fx:id="concordanceLabel" minWidth="30.0"
                                                                text="Min branch concordance (%):"/>
-                                                        <TextField fx:id="concordanceTextField" maxWidth="60.0">
-                                                            <tooltip>
-                                                                <Tooltip
-                                                                        text="Minimum percentage of input trees that contain a branch for input branch filtering"/>
-                                                            </tooltip>
-                                                        </TextField>
+                                                        <Spinner fx:id="concordanceSpinner" editable="true"
+                                                                 prefWidth="60.0"/>
                                                     </children>
                                                     <padding>
                                                         <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>

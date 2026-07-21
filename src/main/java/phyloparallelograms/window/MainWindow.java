@@ -33,6 +33,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+import jloda.fx.options.Option;
+import jloda.fx.options.OptionsRegistry;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.selection.SetSelectionModel;
 import jloda.fx.undo.UndoManager;
@@ -175,6 +177,14 @@ public class MainWindow implements IMainWindow {
 
 	public MainWindowPresenter getPresenter() {
 		return presenter;
+	}
+
+	/**
+	 * all options of this window that are to be saved and restored, collected from their
+	 * {@link Option} annotations
+	 */
+	public OptionsRegistry getOptionsRegistry() {
+		return getPresenter().getOptionsRegistry();
 	}
 
 	public FlowPane getStatusPane() {

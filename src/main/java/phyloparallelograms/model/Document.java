@@ -29,6 +29,7 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import jloda.fx.options.Option;
 import jloda.fx.util.ColorSchemeManager;
 import jloda.fx.util.ProgramProperties;
 import jloda.fx.util.RunAfterAWhile;
@@ -59,12 +60,15 @@ public class Document {
 	private final BooleanProperty hasTreeConfidences = new SimpleBooleanProperty(this, "treesHaveConfidenceValues", false);
 	private final BooleanProperty networksHaveWeights = new SimpleBooleanProperty(this, "networksHaveWeights", false);
 
+	@Option(description = "Name of the color scheme used to color the trees", aliases = "color_scheme")
 	private final StringProperty colorSchemeName = new SimpleStringProperty(this, "colorSchemeName");
 
 	private final TaxaBlock taxaBlock = new TaxaBlock();
 	private final IntegerProperty numberOfTaxa = new SimpleIntegerProperty(this, "numberOfTaxa", 0);
 
+	@Option(description = "Minimum confidence for input branch filtering, in percent", min = 0, max = 100, aliases = "min_confidence")
 	private final DoubleProperty confidenceThreshold = new SimpleDoubleProperty(this, "confidenceThreshold");
+	@Option(description = "Minimum percentage of input trees that contain a branch, for input branch filtering", min = 0, max = 100, aliases = "min_concordance")
 	private final DoubleProperty concordanceThreshold = new SimpleDoubleProperty(this, "concordanceThreshold");
 
 	public Document() {

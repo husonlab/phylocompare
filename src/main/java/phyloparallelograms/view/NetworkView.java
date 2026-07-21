@@ -37,6 +37,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.StrokeLineCap;
+import jloda.fx.options.Option;
 import jloda.fx.selection.SelectionModel;
 import jloda.fx.util.ProgramProperties;
 import jloda.fx.util.SelectionEffectBlue;
@@ -71,16 +72,26 @@ public class NetworkView extends Group {
 	private final Map<Taxon, LabeledNodeShape> taxonLabeledNodeShapeMap = new HashMap<>();
 	private final Map<Edge, LabeledEdgeShape> edgeLabeledEdgeShapeHashMap = new HashMap<>();
 
+	@Option(description = "Type of tree diagram to draw")
 	private final ObjectProperty<TreeDiagramType> optionDiagram = new SimpleObjectProperty<>(this, "optionDiagram", TreeDiagramType.RectangularCladogram);
+	@Option(description = "Flip the drawing vertically")
 	private final BooleanProperty optionFlipVertically = new SimpleBooleanProperty(this, "optionFlipVertically", false);
+	@Option(description = "How to average the positions of nodes")
 	private final ObjectProperty<Averaging> optionAveraging = new SimpleObjectProperty<>(this, "optionAveraging", Averaging.ChildAverage);
+	@Option(description = "How to scale the drawing")
 	private final ObjectProperty<LayoutRootedPhylogeny.Scaling> optionScaling = new SimpleObjectProperty<>(this, "optionScaling", LayoutRootedPhylogeny.Scaling.LateBranching);
+	@Option(description = "Width of the outline drawn around traced trees", min = 0, max = 100)
 	private final DoubleProperty optionOutlineWidth = new SimpleDoubleProperty(this, "optionOutlineWidth", 30.0);
+	@Option(description = "Show the outline around traced trees")
 	private final BooleanProperty optionShowOutline = new SimpleBooleanProperty(this, "optionShowOutline", false);
+	@Option(description = "Percentage of the reticulate edge that is attributed to the acceptor", min = 50, max = 100)
 	private final DoubleProperty optionAcceptorPercentage = new SimpleDoubleProperty(this, "optionAcceptorPercentage", 75);
+	@Option(description = "Show reticulate edges as transfer edges", aliases = "use_transfer")
 	private final BooleanProperty optionShowTransfer = new SimpleBooleanProperty(this, "optionShowTransfer", false);
 
+	@Option(description = "Draw edges as rectangular lines")
 	private final BooleanProperty optionRectangularEdges = new SimpleBooleanProperty(this, "optionRectangularEdges", false);
+	@Option(description = "Draw reticulate edges in a special style")
 	private final BooleanProperty optionReticulateEdgesAreSpecial = new SimpleBooleanProperty(this, "optionReticulateEdgesAreSpecial", true);
 
 	private final SelectionModel<Taxon> taxonSelectionModel;
@@ -255,7 +266,7 @@ public class NetworkView extends Group {
 
 	private void drawTracedTrees(PhyloTree network, String colorSchemeName, List<TreeRecord> treeRecords) {
 		var trees = BitSetUtils.asBitSet(treeRecords.stream().filter(TreeRecord::isShow).mapToInt(TreeRecord::getId).toArray());
-		Function<Edge, Path> edgePathFunction = e -> (Path) edgeLabeledEdgeShapeHashMap.get(e).getShape();
+		Function<Edge, Path> edgePathFunction = e -> (Path) (edgeLabeledEdgeShapeHashMap.containsKey(e) ? edgeLabeledEdgeShapeHashMap.get(e).getShape() : null);
 		tracedTreesGroup.getChildren().setAll(DrawTracedTrees.apply(network, colorSchemeName, treeRecords, trees, getOptionOutlineWidth(), edgePathFunction, legend));
 	}
 

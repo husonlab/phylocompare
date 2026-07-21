@@ -41,10 +41,7 @@ public class Save {
 	public static void apply(File file, MainWindow window) {
 		try {
 			var document = window.getDocument();
-			var networkView = window.getPresenter().getNetworkView();
-			var parameters = new PhyloParallelogramsDB.Parameters(document.getApplicableConfidenceThreshold(), document.getConcordanceThreshold(), networkView.getOptionOutlineWidth(), networkView.isOptionShowOutline(),
-					document.getColorSchemeName(), networkView.optionShowTransferProperty().get(), networkView.optionAcceptorPercentageProperty().get());
-			PhyloParallelogramsDB.save(file.getPath(), document.getTreeRecords(), document.getNetworks(), document.getTaxaBlock(), parameters);
+			PhyloParallelogramsDB.save(file.getPath(), document.getTreeRecords(), document.getNetworks(), document.getTaxaBlock(), window.getOptionsRegistry());
 			window.dirtyProperty().set(false);
 		} catch (Exception e) {
 			WindowNotifications.showError(window.getController().getCenterPane(), "Save failed: " + e.getMessage());
