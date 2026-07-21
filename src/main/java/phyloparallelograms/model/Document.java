@@ -68,6 +68,7 @@ public class Document {
 
 	@Option(description = "Minimum confidence for input branch filtering, in percent", min = 0, max = 100, aliases = "min_confidence")
 	private final DoubleProperty confidenceThreshold = new SimpleDoubleProperty(this, "confidenceThreshold");
+
 	@Option(description = "Minimum percentage of input trees that contain a branch, for input branch filtering", min = 0, max = 100, aliases = "min_concordance")
 	private final DoubleProperty concordanceThreshold = new SimpleDoubleProperty(this, "concordanceThreshold");
 

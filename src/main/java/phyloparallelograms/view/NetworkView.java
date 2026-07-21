@@ -74,24 +74,32 @@ public class NetworkView extends Group {
 
 	@Option(description = "Type of tree diagram to draw")
 	private final ObjectProperty<TreeDiagramType> optionDiagram = new SimpleObjectProperty<>(this, "optionDiagram", TreeDiagramType.RectangularCladogram);
+
 	@Option(description = "Flip the drawing vertically")
 	private final BooleanProperty optionFlipVertically = new SimpleBooleanProperty(this, "optionFlipVertically", false);
+
 	@Option(description = "How to average the positions of nodes")
 	private final ObjectProperty<Averaging> optionAveraging = new SimpleObjectProperty<>(this, "optionAveraging", Averaging.ChildAverage);
+
 	@Option(description = "How to scale the drawing")
 	private final ObjectProperty<LayoutRootedPhylogeny.Scaling> optionScaling = new SimpleObjectProperty<>(this, "optionScaling", LayoutRootedPhylogeny.Scaling.LateBranching);
-	@Option(description = "Width of the outline drawn around traced trees", min = 0, max = 100)
+
+	@Option(description = "Spread of traced trees", min = 0, max = 100)
 	private final DoubleProperty optionOutlineWidth = new SimpleDoubleProperty(this, "optionOutlineWidth", 30.0);
+
 	@Option(description = "Show the outline around traced trees")
 	private final BooleanProperty optionShowOutline = new SimpleBooleanProperty(this, "optionShowOutline", false);
-	@Option(description = "Percentage of the reticulate edge that is attributed to the acceptor", min = 50, max = 100)
+
+	@Option(description = "Percentage of trees required to the be a transfer-acceptor edge", min = 50, max = 100)
 	private final DoubleProperty optionAcceptorPercentage = new SimpleDoubleProperty(this, "optionAcceptorPercentage", 75);
+
 	@Option(description = "Show reticulate edges as transfer edges", aliases = "use_transfer")
 	private final BooleanProperty optionShowTransfer = new SimpleBooleanProperty(this, "optionShowTransfer", false);
 
 	@Option(description = "Draw edges as rectangular lines")
 	private final BooleanProperty optionRectangularEdges = new SimpleBooleanProperty(this, "optionRectangularEdges", false);
-	@Option(description = "Draw reticulate edges in a special style")
+
+	@Option(description = "Draw reticulate edges in a special style, e.g. as curves")
 	private final BooleanProperty optionReticulateEdgesAreSpecial = new SimpleBooleanProperty(this, "optionReticulateEdgesAreSpecial", true);
 
 	private final SelectionModel<Taxon> taxonSelectionModel;
