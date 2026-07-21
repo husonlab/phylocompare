@@ -43,6 +43,7 @@ import jloda.fx.icons.MaterialIcons;
 import jloda.fx.options.OptionControls;
 import jloda.fx.options.OptionsRegistry;
 import jloda.fx.service.UpdateService;
+import jloda.fx.undo.CoalescingUndo;
 import jloda.fx.util.*;
 import jloda.fx.window.MainWindowManager;
 import jloda.fx.window.SplashScreen;
@@ -83,6 +84,11 @@ public class MainWindowPresenter {
 	 */
 	private static final long RECOMPUTE_DELAY = 500L;
 
+	/**
+	 * milliseconds to wait after the last change of a spinner-driven option before adding an undoable item
+	 */
+	private static final long UNDO_COALESCE_DELAY = 500L;
+
 	private final MainWindow window;
 	private final Runnable updateNetworkDrawing;
 	private final Runnable updateTreesDrawing;
@@ -121,6 +127,7 @@ public class MainWindowPresenter {
 
 		OptionControls.bindSpinner(controller.getConfidenceSpinner(), optionsRegistry.get("confidence_threshold"), 1);
 		controller.getConfidenceSpinner().disableProperty().bind(document.hasTreeConfidencesProperty().not().or(canRun.not()));
+		CoalescingUndo.track(undoManager, "min branch confidence", confidenceThreshold, UNDO_COALESCE_DELAY);
 		confidenceThreshold.addListener(e -> runRecomputeNetworkAfterAWhile());
 
 		controller.getSetConfidenceThresholdMenuItem().setOnAction(e -> {
@@ -132,6 +139,7 @@ public class MainWindowPresenter {
 
 		OptionControls.bindSpinner(controller.getConcordanceSpinner(), optionsRegistry.get("concordance_threshold"), 1);
 		controller.getConcordanceSpinner().disableProperty().bind(canRun.not().or(Bindings.createBooleanBinding(() -> document.getRunTrees().size() < 5, document.updatedRunTreesProperty())));
+		CoalescingUndo.track(undoManager, "min branch concordance", concordanceThreshold, UNDO_COALESCE_DELAY);
 		concordanceThreshold.addListener(e -> runRecomputeNetworkAfterAWhile());
 
 		controller.getSetCondordanceThresholdMenuItem().setOnAction(e -> {
@@ -208,10 +216,9 @@ public class MainWindowPresenter {
 		});
 		controller.getAcceptorPercentMenuItem().disableProperty().bind(controller.getUseTransferMenuItem().disableProperty());
 
-		networkView.optionAcceptorPercentageProperty().addListener((v, o, n) -> {
-			undoManager.add("transfer acceptor percent", networkView.optionAcceptorPercentageProperty(), o, n);
-			runUpdateNetworkDrawing();
-		});
+		// coalescing, so that a burst of spinner arrow presses gives one undoable item, not one per press:
+		CoalescingUndo.track(undoManager, "transfer acceptor percent", networkView.optionAcceptorPercentageProperty(), UNDO_COALESCE_DELAY);
+		networkView.optionAcceptorPercentageProperty().addListener(e -> runUpdateNetworkDrawing());
 		networkView.optionShowTransferProperty().addListener(e -> runUpdateNetworkDrawing());
 
 		networkView.optionShowTransferProperty().addListener((v, o, n) -> {
@@ -219,10 +226,8 @@ public class MainWindowPresenter {
 			runUpdateNetworkDrawing();
 		});
 
-		networkView.optionOutlineWidthProperty().addListener((v, o, n) -> {
-			runUpdateNetworkDrawing();
-			undoManager.add("width", networkView.optionOutlineWidthProperty(), o, n);
-		});
+		CoalescingUndo.track(undoManager, "width", networkView.optionOutlineWidthProperty(), UNDO_COALESCE_DELAY);
+		networkView.optionOutlineWidthProperty().addListener(e -> runUpdateNetworkDrawing());
 		networkView.optionAveragingProperty().addListener((v, o, n) -> {
 			runUpdateNetworkDrawing();
 			undoManager.add("averaging", networkView.optionAveragingProperty(), o, n);

@@ -1,6 +1,6 @@
 # PhyloParallelgrams User Manual
 
-**Version 1.0.3**
+**Version 1.0.10**
 **Daniel H. Huson, 2026**
 
 > *Keyboard shortcuts:* throughout this manual, `Cmd` denotes the platform shortcut modifier - Cmd on macOS, Ctrl on
