@@ -45,17 +45,22 @@ public class FileOpener implements Consumer<String> {
 
 	@Override
 	public void accept(String fileName) {
-		var window = (MainWindow) MainWindowManager.getInstance().getLastFocusedMainWindow();
-		if (window == null || !window.isEmpty()) {
-			window = NewWindow.apply();
-		}
-		var fWindow = window;
-		Platform.runLater(() -> accept(fileName, fWindow));
+		Platform.runLater(() -> accept(fileName, fileName, null));
 	}
 
-	public void accept(String fileName, MainWindow window) {
+	public void accept(String fileName, String title, MainWindow window) {
+		if (window == null) {
+			window = (MainWindow) MainWindowManager.getInstance().getLastFocusedMainWindow();
+			if (window == null || !window.isEmpty()) {
+				window = NewWindow.apply();
+			}
+		}
 		try {
-			if (SQLiteUtils.isSQLiteWithTreesOrNetworksTable(fileName)) {
+			if (PhyloParallelogramsText.isPhyloParallelogramsTextFile(fileName)) {
+				PhyloParallelogramsText.load(fileName, window.getDocument(), window.getOptionsRegistry());
+			} else if (SQLiteUtils.isSQLiteWithTreesOrNetworksTable(fileName)) {
+				// legacy: PhyloParallelograms files written in the old SQLite format (desktop only; the native
+				// driver is absent on iOS, where isSQLiteWithTreesOrNetworksTable simply returns false)
 				PhyloParallelogramsDB.load(fileName, window.getDocument(), window.getOptionsRegistry());
 			} else {
 				var firstLine = Objects.requireNonNull(FileUtils.getFirstLineFromFile(new File(fileName))).trim().toLowerCase();
@@ -76,10 +81,10 @@ public class FileOpener implements Consumer<String> {
 					ImportNewick.apply(window, fileName);
 				}
 			}
-			if (!fileName.endsWith(".phycmp")) // forget old PhyloCompare files
+			if (!fileName.endsWith(".phycmp") && fileName.equals(title)) // forget old PhyloCompare files and only if fileName==title
 				RecentFilesManager.getInstance().insertRecentFile(fileName);
-			window.setFileName(fileName);
-			WindowNotifications.showInfo(window.getController().getCenterPane(), "Loaded file: " + FileUtils.getFileNameWithoutPath(fileName));
+			window.setFileName(title);
+			WindowNotifications.showInfo(window.getController().getCenterPane(), "Loaded file: " + FileUtils.getFileNameWithoutPath(title));
 
 		} catch (IOException e) {
 			WindowNotifications.showError(window.getController().getCenterPane(), "Open file failed: " + e.getMessage());
@@ -88,6 +93,8 @@ public class FileOpener implements Consumer<String> {
 
 	public static boolean isAcceptable(File file) {
 		var fileName = file.getPath();
+		if (PhyloParallelogramsText.isPhyloParallelogramsTextFile(fileName))
+			return true;
 		if (SQLiteUtils.isSQLiteWithTreesOrNetworksTable(fileName))
 			return true;
 		var firstLine = Objects.requireNonNull(FileUtils.getFirstLineFromFile(new File(fileName))).trim().toLowerCase();

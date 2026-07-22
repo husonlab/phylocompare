@@ -56,8 +56,10 @@ import jloda.util.StringUtils;
 import phyloparallelograms.algorithm.AlgorithmsService;
 import phyloparallelograms.algorithm.RemoveTaxaService;
 import phyloparallelograms.algorithm.RerootService;
+import phyloparallelograms.examples.ExamplesSupport;
 import phyloparallelograms.io.*;
 import phyloparallelograms.main.Version;
+import phyloparallelograms.model.Document;
 import phyloparallelograms.trace.BruteForceTreeTracer;
 import phyloparallelograms.trace.TreeTrace;
 import phyloparallelograms.utils.SplitPaneSupport;
@@ -112,6 +114,8 @@ public class MainWindowPresenter {
 
 		var confidenceThreshold = document.confidenceThresholdProperty();
 		var concordanceThreshold = document.concordanceThresholdProperty();
+
+		var focusOwner = window.getStage().getScene().focusOwnerProperty();
 
 		SetupColorSchemes.apply(window);
 
@@ -179,6 +183,8 @@ public class MainWindowPresenter {
 		});
 		document.getTreeRecords().addListener((InvalidationListener) e -> runUpdateNetworkDrawing());
 		document.colorSchemeNameProperty().addListener(e -> runUpdateTreesDrawing());
+
+		setupNote(document);
 
 		algorithmsService = new AlgorithmsService(controller.getBottomFlowPane());
 		algorithmsService.setOnSucceeded(e -> {
@@ -576,11 +582,17 @@ public class MainWindowPresenter {
 		controller.getSaveMenuItem().setOnAction(e -> Save.showSaveDialog(this.window));
 		controller.getSaveMenuItem().disableProperty().bind(document.emptyProperty().or(serviceRunning));
 
-		controller.getUndoMenuItem().setOnAction(e -> undoManager.undo());
+		controller.getUndoMenuItem().setOnAction(e -> {
+			if (!(focusOwner.get() instanceof TextInputControl))
+				undoManager.undo();
+		});
 		controller.getUndoMenuItem().textProperty().bind(undoManager.undoNameProperty());
 		controller.getUndoMenuItem().disableProperty().bind(undoManager.undoableProperty().not().or(serviceRunning));
 
-		controller.getRedoMenuItem().setOnAction(e -> undoManager.redo());
+		controller.getRedoMenuItem().setOnAction(e -> {
+			if (!(focusOwner.get() instanceof TextInputControl))
+				undoManager.redo();
+		});
 		controller.getRedoMenuItem().textProperty().bind(undoManager.redoNameProperty());
 		controller.getRedoMenuItem().disableProperty().bind(undoManager.redoableProperty().not().or(serviceRunning));
 
@@ -622,6 +634,8 @@ public class MainWindowPresenter {
 		});
 		controller.getCopyTreesMenuItem().disableProperty().bind(document.hasTreesProperty().not().or(serviceRunning));
 
+		ExamplesSupport.install(controller.getExamplesFilesMenu(), (s, t) -> (new FileOpener()).accept(FileUtils.PREFIX_TO_INDICATE_TO_PARSE_FILENAME_STRING + t, s, null));
+
 		controller.getPageSetupMenuItem().setOnAction(e -> jloda.fx.print.Print.showPageLayout(window.getStage()));
 		controller.getPrintMenuItem().setOnAction((e) -> {
 			var hPolicy = controller.getScrollPane().getHbarPolicy();
@@ -650,8 +664,7 @@ public class MainWindowPresenter {
 		controller.getCopyNetworkMenuItem().disableProperty().bind(document.hasNetworksProperty().not().or(serviceRunning));
 
 		controller.getCopyMenuItem().setOnAction(e -> {
-			var scene = window.getStage().getScene();
-			if (scene != null && scene.getFocusOwner() instanceof TextInputControl tic) {
+			if (focusOwner.get() instanceof TextInputControl tic) {
 				tic.copy();              // native text-field copy, restored
 			} else if (window.getTaxaSelectionModel().size() > 0) {
 				controller.getCopyTaxaMenuItem().fire();
@@ -663,17 +676,14 @@ public class MainWindowPresenter {
 		});
 		controller.getCopyMenuItem().disableProperty().bind(controller.getCopyTreesMenuItem().disableProperty().and(controller.getCopyNetworkMenuItem().disableProperty()));
 
-		controller.getClearMenuItem().setOnAction(e -> {
-			networkView.clear();
-			document.getNetworks().clear();
-		});
-		controller.getClearMenuItem().disableProperty().bind((document.hasTreesProperty().and(document.hasNetworksProperty()).not()));
 
 		var canEditTreesList = new SimpleBooleanProperty(this, "canEditTreesList", false);
 		canEditTreesList.bind(document.hasTreesProperty().and(document.hasNetworksProperty().not()).or(serviceRunning.not()));
 
 		controller.getPasteMenuItem().setOnAction(e -> {
-			if (ClipboardUtils.hasString()) {
+			if (focusOwner.get() instanceof TextInputControl) {
+				// no need for any action
+			} else if (ClipboardUtils.hasString()) {
 				try {
 					ImportNewick.apply(window, new BufferedReader(new StringReader(ClipboardUtils.getString())), true);
 				} catch (IOException ex) {
@@ -683,8 +693,16 @@ public class MainWindowPresenter {
 		});
 		controller.getPasteMenuItem().disableProperty().bind(canEditTreesList.not().and(document.emptyProperty().not()));
 
-		controller.getDeleteMenuItem().setOnAction(e -> document.getTreeRecords().removeAll(getSelectedRowsOrAll(controller.getTreeTable(), document.getTreeRecords())));
-		controller.getDeleteMenuItem().disableProperty().bind(serviceRunning.or(document.emptyProperty()));
+		controller.getClearMenuItem().setOnAction(e -> {
+			if (focusOwner.get() instanceof TextInputControl tic)
+				tic.clear();
+			else {
+				networkView.clear();
+				document.getNetworks().clear();
+			}
+		});
+		controller.getClearMenuItem().disableProperty().bind((document.hasTreesProperty().and(document.hasNetworksProperty()).not()));
+
 
 		controller.getImportTreeNamesMenuItem().setOnAction(e -> {
 			var previousFile = new File(jloda.util.ProgramProperties.get("TreeNamesFile", ""));
@@ -797,6 +815,41 @@ public class MainWindowPresenter {
 		} else {
 			return treeTableView.getSelectionModel().getSelectedItems();
 		}
+	}
+
+	/**
+	 * wires the dataset note: the text area and the document's note property are kept in sync in both
+	 * directions, user edits mark the window dirty, and a note present on load is revealed automatically
+	 * so its provenance is visible
+	 */
+	private void setupNote(Document document) {
+		var noteTextArea = controller.getNoteTextArea();
+		var toggle = controller.getNoteToggleButton();
+		toggle.setSelected(false);
+		var updating = new boolean[]{false}; // guards against the two listeners echoing each other
+
+		// user edits flow to the document and mark the window dirty
+		noteTextArea.textProperty().addListener((v, o, n) -> {
+			if (!updating[0]) {
+				document.setNote(n);
+				window.dirtyProperty().set(true);
+			}
+		});
+
+		// programmatic changes to the note (e.g. on load) flow back to the text area, without marking dirty
+		document.noteProperty().addListener((v, o, n) -> {
+			if (!noteTextArea.getText().equals(n)) {
+				updating[0] = true;
+				noteTextArea.setText(n == null ? "" : n);
+				updating[0] = false;
+			}
+			if (false && n != null && !n.isBlank()) // reveal a loaded note so the user sees where the data came from
+				toggle.setSelected(true);
+		});
+
+		// initialize from whatever the document already holds
+		noteTextArea.setText(document.getNote());
+		if (false) toggle.setSelected(!document.getNote().isBlank());
 	}
 
 	/**

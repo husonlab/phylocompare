@@ -66,6 +66,10 @@ public class Document {
 	private final TaxaBlock taxaBlock = new TaxaBlock();
 	private final IntegerProperty numberOfTaxa = new SimpleIntegerProperty(this, "numberOfTaxa", 0);
 
+	// a free-text note describing the dataset, e.g. the paper it was obtained from; travels with the file only,
+	// so this is document content, not a program option
+	private final StringProperty note = new SimpleStringProperty(this, "note", "");
+
 	@Option(description = "Minimum confidence for input branch filtering, in percent", min = 0, max = 100, aliases = "min_confidence")
 	private final DoubleProperty confidenceThreshold = new SimpleDoubleProperty(this, "confidenceThreshold");
 
@@ -104,6 +108,19 @@ public class Document {
 	public void clear() {
 		treeRecords.clear();
 		networks.clear();
+		note.set("");
+	}
+
+	public String getNote() {
+		return note.get();
+	}
+
+	public StringProperty noteProperty() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note.set(note == null ? "" : note);
 	}
 
 	public ObservableList<TreeRecord> getTreeRecords() {
@@ -176,6 +193,7 @@ public class Document {
 	public void setTaxa(Collection<PhyloTree> list, boolean clearTaxaBlock) {
 		if (clearTaxaBlock)
 			taxaBlock.clear();
+		list = list.stream().filter(Objects::nonNull).toList();
 
 		if (taxaBlock.getNtax() == 0) {
 			for (var tree : list) {

@@ -58,6 +58,7 @@ public class PhyloParallelograms extends Application {
      * main
      */
     public static void main(String[] args) {
+		System.setProperty("slf4j.internal.verbosity", "WARN"); // suppress SLF4J startup banner, must be set before SLF4J initializes
         Basic.restoreSystemOut(System.err); // send system out to system err
         Basic.startCollectionStdErr();
 		ResourceManagerFX.addResourceRoot(SplitsTree6.class, "splitstree6.resources");

@@ -1,0 +1,48 @@
+#PhyloParallelograms 1.0
+BEGIN metadata;
+	note	Fontaine et al, Extensive introgression in a malaria vector species complex revealed by phylogenomics. *Science* 347(6217): 1258524.\nhttps://doi.org/10.1126/science.1258524, see also:  https://github.com/husonlab/trees-to-networks-tutorial
+END;
+BEGIN taxa;
+	1	An_christyi	An_christyi
+	2	An_coluzzii	An_coluzzii
+	3	An_gambiae	An_gambiae
+	4	An_merus	An_merus
+	5	An_arabiensis	An_arabiensis
+	6	An_melas	An_melas
+	7	An_quadriannulatus	An_quadriannulatus
+END;
+BEGIN trees;
+	1	X_dist_01	1	1	#97141DFF	(An_christyi:0.09394225,((An_coluzzii:0.00338618,An_gambiae:0.00573722):0.0179329:100,(An_merus:0.0221336,(An_arabiensis:0.0159828,(An_melas:0.02543,An_quadriannulatus:0.0153727):0.00171413:47):0.00338297:75):0.0030584:67):0.04492685:1)[&&NHX:GN=X_dist_01];
+	2	X_dist_02	1	1	#E9AF6BFF	(An_christyi:0.10561101,((An_coluzzii:0.00612234,An_gambiae:0.00477444):0.0161996:100,(An_merus:0.0372986,(An_melas:0.027429,(An_arabiensis:0.0165477,An_quadriannulatus:0.0145793):0.00666618:100):0.00478819:92):0.00226741:56):0.04887939:1)[&&NHX:GN=X_dist_02];
+	3	X_dist_03	1	1	#82AE92FF	(An_christyi:0.08690466,((An_coluzzii:0.00345893,An_gambiae:0.00464622):0.01087:100,(An_merus:0.0172453,(An_melas:0.0185326,(An_quadriannulatus:0.00966281,An_arabiensis:0.0101381):0.00188725:65):0.00319528:91):0.00453945:85):0.04588313:1)[&&NHX:GN=X_dist_03];
+	4	X_dist_04	1	1	#356C7CFF	(An_christyi:0.09601836,((An_coluzzii:0.00421426,An_gambiae:0.00642435):0.0088562:98,(An_merus:0.0151725,(An_melas:0.0148294,(An_arabiensis:0.0109419,An_quadriannulatus:0.0123081):0.0027112:79):0.00158019:41):0.00050923:20):0.06141684:1)[&&NHX:GN=X_dist_04];
+	5	X_dist_05	1	1	#5C8C83FF	(An_christyi:0.12516389,((An_coluzzii:0.00428757,An_gambiae:0.00603538):0.0132591:100,(An_merus:0.0237958,(An_melas:0.020133,(An_arabiensis:0.0125315,An_quadriannulatus:0.00993436):0.00343509:86):0.0189337:100):0.00770108:84):0.05804011:1)[&&NHX:GN=X_dist_05];
+	6	X_peri_01	1	1	#3A2B27FF	(An_christyi:0.09597532,((An_melas:0.0190322,An_merus:0.0333994):0.00273724:75,(An_quadriannulatus:0.0110218,((An_coluzzii:0.00481443,An_gambiae:0.00294161):0.00817834:100,An_arabiensis:0.0089845):0.00073855:66):0.00347789:91):0.04425728:1)[&&NHX:GN=X_peri_01];
+	7	auto_2R_01	1	1	#E28B90FF	(An_christyi:0.10759178,((((An_merus:0.0290845,An_quadriannulatus:0.0181202):0.00410359:85,An_melas:0.0278439):0.00199387:46,An_arabiensis:0.0166652):0.0017916:38,(An_gambiae:0.00963636,An_coluzzii:0.0106971):0.00447621:99):0.05279722:1)[&&NHX:GN=auto_2R_01];
+	8	auto_2R_02	1	1	#242666FF	(An_christyi:0.10428881,(An_merus:0.0277723,(An_melas:0.0328236,(An_quadriannulatus:0.0214706,(An_arabiensis:0.0140522,(An_gambiae:0.00917841,An_coluzzii:0.0125383):0.00430602:99):0.00638899:73):0.00282895:58):0.00443403:52):0.04989918:1)[&&NHX:GN=auto_2R_02];
+	9	auto_2R_03	1	1	#C2A690FF	(An_christyi:0.09163767,((An_melas:0.0196043,An_merus:0.0235759):0.00155543:67,(An_quadriannulatus:0.0178809,((An_gambiae:0.00620365,An_coluzzii:0.00611027):0.00338576:90,An_arabiensis:0.00982725):0.0039411:97):0.0004042:38):0.05069193:1)[&&NHX:GN=auto_2R_03];
+	10	auto_3R_01	1	1	#B80614FF	(An_christyi:0.14263387,((An_melas:0.0243033,An_merus:0.0226663):0.00189709:54,(An_quadriannulatus:0.0168069,(An_coluzzii:0.0134716,(An_gambiae:0.0115117,An_arabiensis:0.0160114):0.00358705:64):0.00703341:99):0.00387688:83):0.08664923:1)[&&NHX:GN=auto_3R_01];
+	11	auto_3R_02	1	1	#35644FFF	(An_christyi:0.0920282,((An_merus:0.0248094,An_melas:0.021326):0.003573:81,(An_quadriannulatus:0.015867,(An_arabiensis:0.00731312,(An_coluzzii:0.00290455,An_gambiae:0.00508497):0.00282293:100):0.00412246:100):0.00169756:74):0.0480784:1)[&&NHX:GN=auto_3R_02];
+	12	inv_2La_01	1	1	#E3A380FF	(An_christyi:0.10737692,(An_merus:0.026051,((An_melas:0.0323239,An_quadriannulatus:0.0178813):0.00230242:86,(An_gambiae:0.0139142,(An_arabiensis:0.0168955,An_coluzzii:0.0106348):0.00627701:100):0.00923286:97):0.00720552:69):0.04825288:1)[&&NHX:GN=inv_2La_01];
+	13	inv_2La_02	1	1	#B9A253FF	(An_christyi:0.1044014,(((An_gambiae:0.0166742,An_coluzzii:0.010703):0.00256572:67,An_quadriannulatus:0.0140737):0.00165679:68,(An_arabiensis:0.0149692,(An_melas:0.0208578,An_merus:0.0219203):0.00345883:73):0.00138768:49):0.059431:1)[&&NHX:GN=inv_2La_02];
+	14	inv_3La_01	1	1	#72A283FF	(An_christyi:0.12404786,((An_melas:0.0284673,An_arabiensis:0.0136176):0.00359949:65,((An_merus:0.0218289,An_quadriannulatus:0.0195075):0.00710773:94,(An_coluzzii:0.00871264,An_gambiae:0.00868314):0.00326262:81):0.00415608:68):0.06945485:1)[&&NHX:GN=inv_3La_01];
+	15	inv_3La_02	1	1	#73605BFF	(An_christyi:0.08642385,(((An_quadriannulatus:0.0122011,An_merus:0.0205557):0.00442467:89,An_melas:0.0274273):0.0032574:89,(An_coluzzii:0.00577517,(An_arabiensis:0.0121264,An_gambiae:0.0101053):0.00285064:70):0.00155259:55):0.04152285:1)[&&NHX:GN=inv_3La_02];
+END;
+BEGIN networks;
+	0	N1	((An_christyi[&TT={1-15}]:0.10426972,(((((((An_arabiensis[&TT={1-15}]:0.01090053,(An_gambiae[&TT={1-15}]:0.00716833)#H1[&TT={1-15}]:[&TT={10,15}]0.00364017)[&TT={1-15}]:0.00005048,(((An_coluzzii[&TT={1-15}]:0.00625186,#H1:[&TT={1-9,11,13,14}]0)[&TT={1-15}]:0.0046844,((An_quadriannulatus[&TT={1-15}]:0.01445974,(An_merus[&TT={1-15}]:0.02382303)#H4[&TT={1-15}]:[&TT={7,14,15}]0)[&TT={1-15}]:0)#H3[&TT={1-15}]:[&TT={13,14}]0.00336085)[&TT={1-15}]:0)#H2[&TT={1-15}]:[&TT={6,8-12,15}]0)[&TT={1-15}]:0.00265797,#H3:[&TT={2-6,8-11}]0)[&TT={1-15}]:0,#H1:[&TT={12}]0.00674587)[&TT={1-15}]:0.0027941,((An_melas[&TT={1-15}]:0.02337158,#H3:[&TT={1,7,12,15}]0.0032157)[&TT={1-15}]:0,#H4:[&TT={6,9-11,13}]0.00145123)[&TT={1-15}]:0.00163166)[&TT={1-15}]:0.00385785,#H4:[&TT={1-5,8,12}]0.00038684)[&TT={1-15}]:0,#H2:[&TT={1-5,7,13,14}]0.00616256)[&TT={1-15}]:0.05272613)[&TT={1-15}]:0)[&TT={1-15}];
+END;
+BEGIN parameters;
+	color_scheme_name	string	Retro29
+	confidence_threshold	double	0
+	concordance_threshold	double	0
+	diagram	enum	RectangularCladogram
+	flip_vertically	boolean	false
+	averaging	enum	ChildAverage
+	scaling	enum	LateBranching
+	outline_width	double	50
+	show_outline	boolean	false
+	acceptor_percentage	double	50
+	show_transfer	boolean	false
+	rectangular_edges	boolean	false
+	reticulate_edges_are_special	boolean	true
+END;

@@ -107,9 +107,6 @@ public class MainWindowController {
 	private MenuItem decreaseFontSizeMenuItem;
 
 	@FXML
-	private MenuItem deleteMenuItem;
-
-	@FXML
 	private Menu editMenu;
 
 	@FXML
@@ -162,6 +159,9 @@ public class MainWindowController {
 
 	@FXML
 	private Menu recentFilesMenu;
+
+	@FXML
+	private Menu examplesFilesMenu;
 
 	@FXML
 	private MenuItem redoMenuItem;
@@ -361,6 +361,15 @@ public class MainWindowController {
 	@FXML
 	private ToggleButton formatToggleButton;
 
+	@FXML
+	private ToggleButton noteToggleButton;
+
+	@FXML
+	private TitledPane noteTitledPane;
+
+	@FXML
+	private TextArea noteTextArea;
+
 	private ZoomableScrollPane scrollPane;
 
 	@FXML
@@ -390,6 +399,7 @@ public class MainWindowController {
 
 		MaterialIcons.setIcon(findButton, MaterialIcons.search);
 		MaterialIcons.setIcon(formatToggleButton, MaterialIcons.tune);
+		MaterialIcons.setIcon(noteToggleButton, MaterialIcons.sticky_note_2);
 
 		diagramMenuButton.setStyle("-fx-background-color: transparent;");
 		colorSchemeCBox.setStyle("-fx-background-color: transparent;");
@@ -476,6 +486,9 @@ public class MainWindowController {
 		taxonLabelsTitledPane.visibleProperty().bind(formatToggleButton.selectedProperty());
 		taxonLabelsTitledPane.managedProperty().bind(formatToggleButton.selectedProperty());
 
+		noteTitledPane.visibleProperty().bind(noteToggleButton.selectedProperty());
+		noteTitledPane.managedProperty().bind(noteToggleButton.selectedProperty());
+
 		confidenceLabel.disableProperty().bind(confidenceSpinner.disabledProperty());
 		concordanceLabel.disableProperty().bind(concordanceSpinner.disabledProperty());
 
@@ -549,10 +562,6 @@ public class MainWindowController {
 		return decreaseFontSizeMenuItem;
 	}
 
-	public MenuItem getDeleteMenuItem() {
-		return deleteMenuItem;
-	}
-
 	public Menu getEditMenu() {
 		return editMenu;
 	}
@@ -624,6 +633,10 @@ public class MainWindowController {
 
 	public Menu getRecentFilesMenu() {
 		return recentFilesMenu;
+	}
+
+	public Menu getExamplesFilesMenu() {
+		return examplesFilesMenu;
 	}
 
 	public MenuItem getRedoMenuItem() {
@@ -868,6 +881,14 @@ public class MainWindowController {
 
 	public TitledPane getTaxonLabelsTitledPane() {
 		return taxonLabelsTitledPane;
+	}
+
+	public ToggleButton getNoteToggleButton() {
+		return noteToggleButton;
+	}
+
+	public TextArea getNoteTextArea() {
+		return noteTextArea;
 	}
 
 	public MenuItem getZoomInHorizontallyMenuItem() {

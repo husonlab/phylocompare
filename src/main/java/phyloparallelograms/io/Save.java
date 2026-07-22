@@ -41,7 +41,7 @@ public class Save {
 	public static void apply(File file, MainWindow window) {
 		try {
 			var document = window.getDocument();
-			PhyloParallelogramsDB.save(file.getPath(), document.getTreeRecords(), document.getNetworks(), document.getTaxaBlock(), window.getOptionsRegistry());
+			PhyloParallelogramsText.save(file.getPath(), document.getTreeRecords(), document.getNetworks(), document.getTaxaBlock(), window.getOptionsRegistry(), document.getNote());
 			window.dirtyProperty().set(false);
 		} catch (Exception e) {
 			WindowNotifications.showError(window.getController().getCenterPane(), "Save failed: " + e.getMessage());

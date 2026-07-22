@@ -1,0 +1,68 @@
+#PhyloParallelograms 1.0
+BEGIN metadata;
+	note	Nicholas P. Tippery, Donald H. Les, Phylogenetic Relationships and Morphological Evolution in Nymphoides (Menyanthaceae),\nSystematic Botany, 36(4), 1101-1113, (1 October 2011)
+END;
+BEGIN taxa;
+	1	Nymphoidesfallax	Nymphoidesfallax
+	2	N.humboldtiana	N.humboldtiana
+	3	N.rautanenii	N.rautanenii
+	4	N.brevipedicellata	N.brevipedicellata
+	5	N.thunbergiana	N.thunbergiana
+	6	Nymphoidessp.1	Nymphoidessp.1
+	7	Nymphoidessp.2	Nymphoidessp.2
+	8	N.parvifolia	N.parvifolia
+	9	N.quadrilopa	N.quadrilopa
+	10	N.furculifolia	N.furculifolia
+	11	N.indica	N.indica
+	12	N.coreana	N.coreana
+	13	N.cristata	N.cristata
+	14	N.ezannoi	N.ezannoi
+	15	N.aquatica	N.aquatica
+	16	N.cordata	N.cordata
+	17	N.minima	N.minima
+	18	N.beaglensis	N.beaglensis
+	19	N.disperma	N.disperma
+	20	N.planosperma	N.planosperma
+	21	N.simulans	N.simulans
+	22	N.spongiosa	N.spongiosa
+	23	N.subacuta	N.subacuta
+	24	N.spinulosperma	N.spinulosperma
+	25	N.aurantiaca	N.aurantiaca
+	26	N.cambodiana	N.cambodiana
+	27	N.montana	N.montana
+	28	N.geminata	N.geminata
+	29	N.elliptica	N.elliptica
+	30	N.triangularis	N.triangularis
+	31	N.exiliflora	N.exiliflora
+	32	N.peltata	N.peltata
+	33	N.crenata	N.crenata
+	34	Liparophyllumcapitatum	Liparophyllumcapitatum
+	35	L.exiguum	L.exiguum
+	36	L.congestiflorum	L.congestiflorum
+	37	L.latifolium	L.latifolium
+	38	L.exaltatum	L.exaltatum
+	39	L.gunnii	L.gunnii
+	40	L.lasiosperum	L.lasiosperum
+END;
+BEGIN trees;
+	1	ITS	1	1	#8633BCFF	((((((((((Nymphoidesfallax:,N.humboldtiana:):,N.rautanenii:):,(N.brevipedicellata:,N.thunbergiana:):):,(((Nymphoidessp.1:,Nymphoidessp.2:):,((N.parvifolia:,N.quadrilopa:):,N.furculifolia:):):,N.indica:):,N.coreana:,N.cristata:,(N.ezannoi:,(N.aquatica:,N.cordata:):):):,N.minima:):,(N.beaglensis:,N.disperma:):,(N.planosperma:,N.simulans:,N.spongiosa:):,N.subacuta:):,N.spinulosperma:):,(N.aurantiaca:,N.cambodiana:):):,((((N.montana:,N.geminata:):,(N.elliptica:,N.triangularis:):):,N.exiliflora:):,N.peltata:):,N.crenata:):0.5,((((((Liparophyllumcapitatum:1,L.exiguum:1):1,L.congestiflorum:1):1,L.latifolium:1):1,L.exaltatum:1):1,L.gunnii:1):1,L.lasiosperum:1):0.5)[&&NHX:GN=ITS];
+	2	matK_trnK	1	1	#41A744FF	((((((((Nymphoidesfallax:,N.humboldtiana:):,N.indica:,N.coreana:,N.ezannoi:):,(N.aquatica:,N.cordata:):,N.rautanenii:,N.brevipedicellata:,N.thunbergiana:,N.cristata:):,((Nymphoidessp.1:,Nymphoidessp.2:,N.parvifolia:,N.quadrilopa:):,N.furculifolia:):):,N.minima:):,N.beaglensis:,(N.disperma:,N.spinulosperma:,N.montana:):):,(N.peltata:,(N.planosperma:,N.simulans:,N.spongiosa:):,(N.subacuta:,N.elliptica:):,(N.aurantiaca:,N.cambodiana:):,N.triangularis:):,N.geminata:,N.exiliflora:,N.crenata:):0.5,(L.gunnii:1,(((Liparophyllumcapitatum:1,L.exiguum:1):1,L.congestiflorum:1):1,L.latifolium:1):1,L.lasiosperum:1,L.exaltatum:1):0.5)[&&NHX:GN=matK_trnK];
+END;
+BEGIN networks;
+	0	N1	((((L.gunnii[&TT={1,2}]:0.99999999,(((L.congestiflorum[&TT={1,2}]:0.99999999,(Liparophyllumcapitatum[&TT={1,2}]:0.99999999,L.exiguum[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,L.latifolium[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,L.exaltatum[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,L.lasiosperum[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.5,(((((((N.triangularis[&TT={1,2}]:0.99999999,(N.elliptica[&TT={1,2}]:0.99999999)#H1[&TT={1,2}]:[&TT={1}]0)[&TT={1,2}]:0,(N.peltata[&TT={1,2}]:0.99999999)#H2[&TT={1,2}]:[&TT={2}]0)[&TT={1,2}]:0,((N.planosperma[&TT={1,2}]:0.99999999,N.simulans[&TT={1,2}]:0.99999999,N.spongiosa[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)#H3[&TT={1,2}]:[&TT={2}]0,((N.subacuta[&TT={1,2}]:0.99999997,#H1:[&TT={2}]0)[&TT={1,2}]:0.00000004)#H4[&TT={1,2}]:[&TT={2}]0.99999994,((N.aurantiaca[&TT={1,2}]:0.99999999,N.cambodiana[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)#H5[&TT={1,2}]:[&TT={2}]0)[&TT={1,2}]:0.99999999,(N.geminata[&TT={1,2}]:0.66666666,((N.montana[&TT={1,2}]:0.99999997,(N.disperma[&TT={1,2}]:0.99999999)#H7[&TT={1,2}]:[&TT={2}]0,(N.spinulosperma[&TT={1,2}]:0.99999999)#H8[&TT={1,2}]:[&TT={2}]0)[&TT={1,2}]:0.00000004)#H6[&TT={1,2}]:[&TT={1}]0)[&TT={1,2}]:0.66666666)[&TT={1,2}]:0.99999999,N.exiliflora[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,#H2:[&TT={1}]0)[&TT={1,2}]:0.99999999,((((((N.beaglensis[&TT={1,2}]:0.66666666,#H7:[&TT={1}]0)[&TT={1,2}]:0.66666666,(N.minima[&TT={1,2}]:0.99999999,((((((((N.coreana[&TT={1,2}]:0.99999999)#H9[&TT={1,2}]:[&TT={2}]0,(Nymphoidesfallax[&TT={1,2}]:0.99999999,N.humboldtiana[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.66666666)[&TT={1,2}]:0,(N.indica[&TT={1,2}]:0.99999999)#H10[&TT={1,2}]:[&TT={2}]0,(N.ezannoi[&TT={1,2}]:0.99999999)#H11[&TT={1,2}]:[&TT={2}]0)[&TT={1,2}]:0.66666666,N.rautanenii[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,(N.brevipedicellata[&TT={1,2}]:0.99999999,N.thunbergiana[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,#H9:[&TT={1}]0)[&TT={1,2}]:0,N.cristata[&TT={1,2}]:0.99999999,(#H11:[&TT={1}]0,(N.aquatica[&TT={1,2}]:0.99999999,N.cordata[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.66666666)[&TT={1,2}]:0.66666666)[&TT={1,2}]:0.99999999,(#H10:[&TT={1}]0,((((N.furculifolia[&TT={1,2}]:0.99999999)#H12[&TT={1,2}]:[&TT={1}]0,(N.parvifolia[&TT={1,2}]:0.99999999,N.quadrilopa[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,(Nymphoidessp.1[&TT={1,2}]:0.99999999,Nymphoidessp.2[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999,#H12:[&TT={2}]0)[&TT={1,2}]:0)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.99999999)[&TT={1,2}]:0,#H3:[&TT={1}]0,#H4:[&TT={1}]0)[&TT={1,2}]:0.99999999,#H8:[&TT={1}]0)[&TT={1,2}]:0.99999999,#H5:[&TT={1}]0)[&TT={1,2}]:0,#H6:[&TT={2}]0.99999994)[&TT={1,2}]:0.99999999,N.crenata[&TT={1,2}]:0.99999999)[&TT={1,2}]:0.5)[&TT={1,2}]:0)[&TT={1,2}];
+END;
+BEGIN parameters;
+	color_scheme_name	string	Caspian8
+	confidence_threshold	double	0
+	concordance_threshold	double	0
+	diagram	enum	RectangularPhylogram
+	flip_vertically	boolean	false
+	averaging	enum	ChildAverage
+	scaling	enum	LateBranching
+	outline_width	double	10
+	show_outline	boolean	false
+	acceptor_percentage	double	50
+	show_transfer	boolean	true
+	rectangular_edges	boolean	false
+	reticulate_edges_are_special	boolean	true
+END;

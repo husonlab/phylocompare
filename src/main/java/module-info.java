@@ -22,6 +22,7 @@ module phyloparallelograms {
 	exports phyloparallelograms.window;
 	exports phyloparallelograms.view;
 	exports phyloparallelograms.model;
+	exports phyloparallelograms.io;
 
 	opens phyloparallelograms.main;
 	opens phyloparallelograms.window;
@@ -30,4 +31,9 @@ module phyloparallelograms {
 	opens phyloparallelograms.utils;
 	opens phyloparallelograms.trace;
 	opens phyloparallelograms.model;
+
+	opens phyloparallelograms.io;
+
+	opens phyloparallelograms.examples;
+	exports phyloparallelograms.examples;
 }

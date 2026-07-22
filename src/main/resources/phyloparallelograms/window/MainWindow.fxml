@@ -139,6 +139,13 @@
                                                                          AnchorPane.rightAnchor="0.0"
                                                                          AnchorPane.topAnchor="0.0">
                                                                     <items>
+                                                                        <ToggleButton fx:id="noteToggleButton"
+                                                                                      mnemonicParsing="false">
+                                                                            <tooltip>
+                                                                                <Tooltip
+                                                                                        text="Show or hide a note describing this dataset, e.g. the paper it is from"/>
+                                                                            </tooltip>
+                                                                        </ToggleButton>
                                                                         <MenuButton fx:id="diagramMenuButton"
                                                                                     text="Diagram"/>
                                                                         <MenuButton fx:id="settingsMenuButton"
@@ -241,9 +248,6 @@
                                                                             </tooltip>
                                                                         </Button>
                                                                     </items>
-                                                                    <padding>
-                                                                        <Insets left="40.0"/>
-                                                                    </padding>
                                                                 </ToolBar>
                                                                 <HBox alignment="CENTER_LEFT" minHeight="-Infinity"
                                                                       prefHeight="30.0" spacing="10.0"
@@ -273,6 +277,19 @@
                                                             </children>
                                                         </AnchorPane>
                                                         <Separator prefWidth="200.0"/>
+                                                        <TitledPane fx:id="noteTitledPane" animated="false"
+                                                                    collapsible="false" text="Note" VBox.vgrow="NEVER">
+                                                            <content>
+                                                                <TextArea fx:id="noteTextArea" focusTraversable="false"
+                                                                          prefRowCount="3"
+                                                                          promptText="A note about this dataset, e.g. the paper it was obtained from"
+                                                                          wrapText="true">
+                                                                    <padding>
+                                                                        <Insets bottom="5.0" left="5.0" right="5.0"/>
+                                                                    </padding>
+                                                                </TextArea>
+                                                            </content>
+                                                        </TitledPane>
                                                     </children>
                                                 </VBox>
                                             </top>
@@ -311,6 +328,7 @@
                                             </accelerator>
                                         </MenuItem>
                                         <Menu fx:id="recentFilesMenu" mnemonicParsing="false" text="Recent"/>
+                                        <Menu fx:id="examplesFilesMenu" mnemonicParsing="false" text="Examples"/>
 
                                         <SeparatorMenuItem mnemonicParsing="false"/>
                                         <Menu mnemonicParsing="false" text="Import">
@@ -405,14 +423,12 @@
                                                                     shortcut="DOWN"/>
                                             </accelerator>
                                         </MenuItem>
-                                        <MenuItem fx:id="deleteMenuItem" mnemonicParsing="false" text="Delete">
+                                        <SeparatorMenuItem mnemonicParsing="false"/>
+                                        <MenuItem fx:id="clearMenuItem" mnemonicParsing="false" text="Clear">
                                             <accelerator>
                                                 <KeyCodeCombination alt="UP" code="BACK_SPACE" control="UP" meta="UP"
                                                                     shift="UP" shortcut="DOWN"/>
                                             </accelerator>
-                                        </MenuItem>
-                                        <SeparatorMenuItem mnemonicParsing="false"/>
-                                        <MenuItem fx:id="clearMenuItem" mnemonicParsing="false" text="Clear">
                                         </MenuItem>
                                         <SeparatorMenuItem mnemonicParsing="false"/>
                                         <MenuItem fx:id="rerootByOutgroupMenuItem" mnemonicParsing="false"
