@@ -1,6 +1,6 @@
 # PhyloParallelgrams User Manual
 
-**Version 1.0.10**
+**Version 1.1.1**
 **Daniel H. Huson, 2026**
 
 > *Keyboard shortcuts:* throughout this manual, `Cmd` denotes the platform shortcut modifier - Cmd on macOS, Ctrl on
@@ -76,6 +76,7 @@ Typical use cases:
 - Confidence-based filtering of input tree branches before computation.
 - Six diagram layouts (rectangular, circular, or radial; cladogram or phylogram).
 - Optional rendering of transfer edges and outline-style display of the underlying network.
+- Advanced PhyloFusion settings - reticulation placement and branch-length fitting - accessible from a settings panel.
 - Export to image and Newick formats; copy trees or network to the clipboard.
 
 ## 2. Installation
@@ -122,7 +123,7 @@ The right panel renders the computed rooted network and, on top of it, the phylo
 trees whose *Show* box is checked. Its toolbar contains:
 
 - **Diagram** - opens a menu for choosing the diagram type (see Section 6.4).
-- **Settings** - opens a menu with rendering options:
+- **More Drawing options** - opens a menu with rendering options:
     - *Show Outline* - show the outline the underlying network.
     - *Spread* spinner - controls the spread of the trees drawn in the parallelogram.
     - *Curved Reticulate Edges* - draw reticulation edges as curves rather than rectangular segments.
@@ -143,6 +144,37 @@ trees whose *Show* box is checked. Its toolbar contains:
     - *Copy Image* - copy the computed image to the clipboard.
 
 A floating legend (top right) shows the color assigned to each tree in the parallelogram.
+
+### 3.3 Taxon-label and PhyloFusion settings panel
+
+The **Settings** button (the *tune* icon) in the visualization panel toggles a floating panel that overlays the top
+right
+of the network view. The panel is an accordion with two sections; click a section header to expand it:
+
+- **Taxon Labels** - change the font, size, and color of the taxon labels drawn on the network.
+
+- **PhyloFusion Settings** - advanced options that control how the underlying network is computed. Changes take effect
+  the next time you run the layout (**Run Layout**, or **Layout > Run PhyloFusion Layout**, `Cmd+R`):
+
+    - **Reticulations** - when several networks are equally good, which subnetwork to place below each reticulate node.
+      *Normal* (the default) avoids *shortcut* reticulate edges (edges whose source is an ancestor of their target);
+      *Smallest* and *Largest* place the subnetwork with the fewest, respectively most, taxa below each reticulate node;
+      *None* simply reports the first network found.
+    - **Edge weights** - how the branch lengths of the network are fitted from the input-tree branch lengths.
+      *LeastSquares* (the default) is a non-negative least-squares fit; *Average* averages the contributing tree
+      branches; *LeastAbsolute* is a least-absolute-deviation (L1) fit; *LeastAbsoluteZeroReticulations* is an L1 fit
+      that forces every reticulate edge to length zero; *None* leaves the branch lengths unset.
+    - **Mutual refinement** - mutually refine the input trees before running PhyloFusion.
+    - **Group non-separated taxa** - group taxa that are never separated by any input tree, to speed up the computation.
+    - **Missing-taxa heuristic** - apply a heuristic that can reduce the number of reticulations when the input trees do
+      not all contain the same taxa.
+
+  The default settings (*Normal* reticulations, *LeastSquares* edge weights) are appropriate for most datasets; the
+  remaining options are provided for advanced users.
+
+A separate **Note** button (the *sticky-note* icon) toggles a floating note in the top left of the view, in which you
+can
+record a description of the dataset (for example, the paper it came from). The note is saved with the document.
 
 ## 4. Loading and saving data
 
@@ -325,4 +357,4 @@ the `LICENSE` file shipped with the distribution, or https://www.gnu.org/license
 
 --
 
-*Manual last updated: June 2026.*
+*Manual last updated: July 2026.*

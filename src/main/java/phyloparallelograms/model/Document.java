@@ -39,6 +39,8 @@ import jloda.util.BitSetUtils;
 import jloda.util.StringUtils;
 import phyloparallelograms.trace.TreeTrace;
 import phyloparallelograms.window.TreeRecord;
+import splitstree6.algorithms.trees.trees2trees.PhyloFusion;
+import splitstree6.compute.phylofusion.PhyloFusionAlgorithm;
 import splitstree6.data.TaxaBlock;
 
 import java.io.IOException;
@@ -76,8 +78,18 @@ public class Document {
 	@Option(description = "Minimum percentage of input trees that contain a branch, for input branch filtering", min = 0, max = 100, aliases = "min_concordance")
 	private final DoubleProperty concordanceThreshold = new SimpleDoubleProperty(this, "concordanceThreshold");
 
+	// the PhyloFusion algorithm used to compute the layout; its options are exposed to advanced users via the
+	// settings pane. Tree tracing is always on (PhyloParallelograms needs the traces); defaults are Normal + NNLS.
+	private final PhyloFusion layoutAlgorithm = new PhyloFusion();
+
 	public Document() {
 		ProgramProperties.track(colorSchemeName, "Retro29");
+
+		layoutAlgorithm.setTreeTracing(true);
+		layoutAlgorithm.setOptionOnlyOneNetwork(true);
+		layoutAlgorithm.setOptionReticulatePlacement(PhyloFusionAlgorithm.ReticulationPreference.Normal);
+		layoutAlgorithm.setOptionEdgeWeights(PhyloFusion.EdgeWeights.LeastSquares);
+		layoutAlgorithm.optionRefinementHeuristicProperty().set(false); // this heuristic is broken, keep it off
 		ProgramProperties.track(confidenceThreshold, 0.0);
 		ProgramProperties.track(concordanceThreshold, 0.0);
 
@@ -263,6 +275,10 @@ public class Document {
 
 	public DoubleProperty concordanceThresholdProperty() {
 		return concordanceThreshold;
+	}
+
+	public PhyloFusion getLayoutAlgorithm() {
+		return layoutAlgorithm;
 	}
 
 	public List<PhyloTree> getRunTrees() {

@@ -123,9 +123,89 @@
                                                                 <Label text="Trees:"/>
                                                             </children>
                                                         </VBox>
-                                                        <TitledPane fx:id="taxonLabelsTitledPane" text="Taxon Labels"
-                                                                    AnchorPane.rightAnchor="20.0"
-                                                                    AnchorPane.topAnchor="5.0"/>
+                                                        <Accordion fx:id="settingsAccordion" prefWidth="290.0"
+                                                                   AnchorPane.rightAnchor="20.0"
+                                                                   AnchorPane.topAnchor="5.0">
+                                                            <panes>
+                                                                <TitledPane fx:id="taxonLabelsTitledPane"
+                                                                            text="Taxon Labels"/>
+                                                                <TitledPane fx:id="phyloFusionSettingsTitledPane"
+                                                                            text="PhyloFusion Settings">
+                                                                    <content>
+                                                                        <GridPane hgap="8.0" vgap="8.0">
+                                                                            <padding>
+                                                                                <Insets bottom="10.0" left="10.0"
+                                                                                        right="10.0" top="10.0"/>
+                                                                            </padding>
+                                                                            <columnConstraints>
+                                                                                <ColumnConstraints hgrow="NEVER"/>
+                                                                                <ColumnConstraints hgrow="ALWAYS"/>
+                                                                            </columnConstraints>
+                                                                            <children>
+                                                                                <Label text="Reticulations:"
+                                                                                       GridPane.columnIndex="0"
+                                                                                       GridPane.rowIndex="0"/>
+                                                                                <ComboBox
+                                                                                        fx:id="reticulationPlacementCBox"
+                                                                                        prefWidth="175.0"
+                                                                                        GridPane.columnIndex="1"
+                                                                                        GridPane.rowIndex="0">
+                                                                                    <tooltip>
+                                                                                        <Tooltip
+                                                                                                text="When several networks are equally good, which subnetwork to place below each reticulate node"/>
+                                                                                    </tooltip>
+                                                                                </ComboBox>
+                                                                                <Label text="Edge weights:"
+                                                                                       GridPane.columnIndex="0"
+                                                                                       GridPane.rowIndex="1"/>
+                                                                                <ComboBox fx:id="edgeWeightsCBox"
+                                                                                          prefWidth="175.0"
+                                                                                          GridPane.columnIndex="1"
+                                                                                          GridPane.rowIndex="1">
+                                                                                    <tooltip>
+                                                                                        <Tooltip
+                                                                                                text="How to fit the network branch lengths from the input trees"/>
+                                                                                    </tooltip>
+                                                                                </ComboBox>
+                                                                                <CheckBox
+                                                                                        fx:id="mutualRefinementCheckBox"
+                                                                                        text="Mutual refinement"
+                                                                                        GridPane.columnIndex="0"
+                                                                                        GridPane.columnSpan="2"
+                                                                                        GridPane.rowIndex="2"/>
+                                                                                <CheckBox
+                                                                                        fx:id="groupNonSeparatedCheckBox"
+                                                                                        text="Group non-separated taxa"
+                                                                                        GridPane.columnIndex="0"
+                                                                                        GridPane.columnSpan="2"
+                                                                                        GridPane.rowIndex="3"/>
+                                                                                <CheckBox
+                                                                                        fx:id="missingTaxaHeuristicCheckBox"
+                                                                                        text="Missing-taxa heuristic"
+                                                                                        GridPane.columnIndex="0"
+                                                                                        GridPane.columnSpan="2"
+                                                                                        GridPane.rowIndex="4"/>
+                                                                            </children>
+                                                                        </GridPane>
+                                                                    </content>
+                                                                </TitledPane>
+                                                            </panes>
+                                                        </Accordion>
+                                                        <TitledPane fx:id="noteTitledPane" animated="false"
+                                                                    collapsible="false" prefWidth="400.0" text="Note"
+                                                                    AnchorPane.leftAnchor="20.0"
+                                                                    AnchorPane.topAnchor="5.0">
+                                                            <content>
+                                                                <TextArea fx:id="noteTextArea" focusTraversable="false"
+                                                                          prefRowCount="5"
+                                                                          promptText="A note about this dataset, e.g. the paper it was obtained from"
+                                                                          wrapText="true">
+                                                                    <padding>
+                                                                        <Insets bottom="5.0" left="5.0" right="5.0"/>
+                                                                    </padding>
+                                                                </TextArea>
+                                                            </content>
+                                                        </TitledPane>
                                                     </children>
                                                 </AnchorPane>
                                             </center>
@@ -277,19 +357,6 @@
                                                             </children>
                                                         </AnchorPane>
                                                         <Separator prefWidth="200.0"/>
-                                                        <TitledPane fx:id="noteTitledPane" animated="false"
-                                                                    collapsible="false" text="Note" VBox.vgrow="NEVER">
-                                                            <content>
-                                                                <TextArea fx:id="noteTextArea" focusTraversable="false"
-                                                                          prefRowCount="3"
-                                                                          promptText="A note about this dataset, e.g. the paper it was obtained from"
-                                                                          wrapText="true">
-                                                                    <padding>
-                                                                        <Insets bottom="5.0" left="5.0" right="5.0"/>
-                                                                    </padding>
-                                                                </TextArea>
-                                                            </content>
-                                                        </TitledPane>
                                                     </children>
                                                 </VBox>
                                             </top>

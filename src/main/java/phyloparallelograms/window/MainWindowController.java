@@ -356,7 +356,28 @@ public class MainWindowController {
 	private Button findButton;
 
 	@FXML
+	private Accordion settingsAccordion;
+
+	@FXML
 	private TitledPane taxonLabelsTitledPane;
+
+	@FXML
+	private TitledPane phyloFusionSettingsTitledPane;
+
+	@FXML
+	private ComboBox<splitstree6.compute.phylofusion.PhyloFusionAlgorithm.ReticulationPreference> reticulationPlacementCBox;
+
+	@FXML
+	private ComboBox<splitstree6.algorithms.trees.trees2trees.PhyloFusion.EdgeWeights> edgeWeightsCBox;
+
+	@FXML
+	private CheckBox mutualRefinementCheckBox;
+
+	@FXML
+	private CheckBox groupNonSeparatedCheckBox;
+
+	@FXML
+	private CheckBox missingTaxaHeuristicCheckBox;
 
 	@FXML
 	private ToggleButton formatToggleButton;
@@ -483,8 +504,8 @@ public class MainWindowController {
 
 		findButton.setOnAction(e -> findCheckMenuItem.fire());
 
-		taxonLabelsTitledPane.visibleProperty().bind(formatToggleButton.selectedProperty());
-		taxonLabelsTitledPane.managedProperty().bind(formatToggleButton.selectedProperty());
+		settingsAccordion.visibleProperty().bind(formatToggleButton.selectedProperty());
+		settingsAccordion.managedProperty().bind(formatToggleButton.selectedProperty());
 
 		noteTitledPane.visibleProperty().bind(noteToggleButton.selectedProperty());
 		noteTitledPane.managedProperty().bind(noteToggleButton.selectedProperty());
@@ -881,6 +902,30 @@ public class MainWindowController {
 
 	public TitledPane getTaxonLabelsTitledPane() {
 		return taxonLabelsTitledPane;
+	}
+
+	public Accordion getSettingsAccordion() {
+		return settingsAccordion;
+	}
+
+	public ComboBox<splitstree6.compute.phylofusion.PhyloFusionAlgorithm.ReticulationPreference> getReticulationPlacementCBox() {
+		return reticulationPlacementCBox;
+	}
+
+	public ComboBox<splitstree6.algorithms.trees.trees2trees.PhyloFusion.EdgeWeights> getEdgeWeightsCBox() {
+		return edgeWeightsCBox;
+	}
+
+	public CheckBox getMutualRefinementCheckBox() {
+		return mutualRefinementCheckBox;
+	}
+
+	public CheckBox getGroupNonSeparatedCheckBox() {
+		return groupNonSeparatedCheckBox;
+	}
+
+	public CheckBox getMissingTaxaHeuristicCheckBox() {
+		return missingTaxaHeuristicCheckBox;
 	}
 
 	public ToggleButton getNoteToggleButton() {

@@ -30,7 +30,6 @@ import phyloparallelograms.trace.BruteForceTreeTracer;
 import phyloparallelograms.utils.NexusBlocksUtils;
 import phyloparallelograms.window.MainWindow;
 import splitstree6.data.TreesBlock;
-import splitstree6.xtra.phyloFusionTreeTrace.PhyloFusionTreeTrace;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,11 +74,9 @@ public class AlgorithmsService extends AService<Boolean> {
 							System.err.println(tree.toBracketString(false) + ";");
 						}
 					}
-					var algorithm = new PhyloFusionTreeTrace();
-					algorithm.setOptionReportTraces(true);
-					algorithm.setEdgeWeightMethod(PhyloFusionTreeTrace.EdgeWeightMethod.NNLS);
-
-					algorithm.optionRefinementHeuristicProperty().set(false); // todo: this is broken, so turn off
+					// the document's PhyloFusion instance carries the settings from the PhyloFusion settings pane
+					// (tree tracing on, Normal + NNLS by default); advanced users can change them there
+					var algorithm = document.getLayoutAlgorithm();
 					algorithm.compute(getProgressListener(), blocks.taxaBlock(), blocks.treesBlock(), resultBlock);
 					if (false) {
 						System.err.println("Output networks:");

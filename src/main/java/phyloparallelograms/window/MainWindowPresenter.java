@@ -67,6 +67,8 @@ import phyloparallelograms.view.Legend;
 import phyloparallelograms.view.NetworkView;
 import phyloparallelograms.view.ScaleDrawing;
 import phyloparallelograms.view.SetupRubberBandSelection;
+import splitstree6.algorithms.trees.trees2trees.PhyloFusion;
+import splitstree6.compute.phylofusion.PhyloFusionAlgorithm;
 import splitstree6.data.parts.Taxon;
 import splitstree6.layout.tree.TreeDiagramType;
 import splitstree6.view.format.taxlabel.TaxonLabelFormat;
@@ -801,6 +803,21 @@ public class MainWindowPresenter {
 
 		var taxonPane = new TaxonLabelFormat(window.getTaxaSelectionModel(), window.dirtyProperty(), window.getUndoManager());
 		controller.getTaxonLabelsTitledPane().setContent(taxonPane.getController().getTitledPane().getContent());
+
+		// PhyloFusion settings pane: expose the layout algorithm's options to advanced users (bound to the document's
+		// PhyloFusion instance, which AlgorithmsService uses to compute the layout)
+		var algorithm = document.getLayoutAlgorithm();
+		var reticulationCBox = controller.getReticulationPlacementCBox();
+		reticulationCBox.getItems().setAll(PhyloFusionAlgorithm.ReticulationPreference.values());
+		reticulationCBox.valueProperty().bindBidirectional(algorithm.optionReticulatePlacementProperty());
+		var edgeWeightsCBox = controller.getEdgeWeightsCBox();
+		edgeWeightsCBox.getItems().setAll(PhyloFusion.EdgeWeights.values());
+		edgeWeightsCBox.valueProperty().bindBidirectional(algorithm.optionEdgeWeightsProperty());
+		controller.getMutualRefinementCheckBox().selectedProperty().bindBidirectional(algorithm.optionMutualRefinementProperty());
+		controller.getGroupNonSeparatedCheckBox().selectedProperty().bindBidirectional(algorithm.optionGroupNonSeparatedProperty());
+		controller.getMissingTaxaHeuristicCheckBox().selectedProperty().bindBidirectional(algorithm.optionMissingTaxaHeuristicProperty());
+		// open on the taxon-labels pane, matching the previous behaviour of the Format button
+		controller.getSettingsAccordion().setExpandedPane(controller.getTaxonLabelsTitledPane());
 		controller.getRemoveTaxaMenuItem().setOnAction(e -> {
 			removeTaxaService.setupCalculation(window, window.getTaxaSelectionModel().getSelectedItems());
 			removeTaxaService.restart();
