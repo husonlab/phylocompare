@@ -341,8 +341,9 @@
                                                                                         text="Select all or none taxa"/>
                                                                             </tooltip>
                                                                         </Button>
-                                                                        <Button fx:id="findButton"
-                                                                                mnemonicParsing="false" text="Find"/>
+                                                                        <ToggleButton fx:id="findButton"
+                                                                                      mnemonicParsing="false"
+                                                                                      text="Find"/>
                                                                         <ToggleButton fx:id="formatToggleButton"
                                                                                       mnemonicParsing="false"
                                                                                       text="Format"/>

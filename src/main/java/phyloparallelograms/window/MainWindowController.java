@@ -353,7 +353,7 @@ public class MainWindowController {
 	private MenuItem removeTaxaMenuItem;
 
 	@FXML
-	private Button findButton;
+	private ToggleButton findButton;
 
 	@FXML
 	private Accordion settingsAccordion;
@@ -502,7 +502,7 @@ public class MainWindowController {
 		else
 			scrollPane.setStyle("-fx-background: white;-fx-background-color: white;");
 
-		findButton.setOnAction(e -> findCheckMenuItem.fire());
+		findButton.selectedProperty().bindBidirectional(findCheckMenuItem.selectedProperty());
 
 		settingsAccordion.visibleProperty().bind(formatToggleButton.selectedProperty());
 		settingsAccordion.managedProperty().bind(formatToggleButton.selectedProperty());

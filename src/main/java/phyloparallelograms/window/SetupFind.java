@@ -54,6 +54,7 @@ class SetupFind {
 		controller.getFindAgainMenuItem().setOnAction(e -> findToolBar.findAgain());
 		controller.getFindAgainMenuItem().disableProperty().bind(findToolBar.canFindAgainProperty().not());
 
-		controller.getRightVBox().getChildren().add(0, findToolBar);
+		// place the find tool bar below the tool bar (and its separator), just above the drawing, rather than above it
+		controller.getRightVBox().getChildren().add(findToolBar);
 	}
 }

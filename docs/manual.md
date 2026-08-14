@@ -337,7 +337,7 @@ If you use PhyloParallelgrams in published work, please cite:
 
 - Huson, D. H., B. Cetinkaya and L. Zhang. PhyloParallelgrams: visualizing agreement and conflict among trees as
   phylogenetic
-  parallelograms, manuscript in preparation.
+  parallelograms, submitted.
 
 and the underlying PhyloFusion paper:
 
