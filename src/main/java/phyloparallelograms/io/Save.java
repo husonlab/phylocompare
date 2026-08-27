@@ -21,6 +21,7 @@
 package phyloparallelograms.io;
 
 import javafx.stage.FileChooser;
+import jloda.fx.util.FileChooserManager;
 import jloda.fx.util.ProgramProperties;
 import jloda.fx.util.RecentFilesManager;
 import jloda.fx.windownotifications.WindowNotifications;
@@ -63,17 +64,14 @@ public class Save {
 			fileChooser.setInitialDirectory(currentFile.getParentFile());
 			fileChooser.setInitialFileName(FileUtils.getFileNameWithoutPathOrSuffix(currentFile.getPath()));
 		} else {
-			var tmp = new File(ProgramProperties.get("SaveFileDir", ""));
-			if (tmp.isDirectory()) {
-				fileChooser.setInitialDirectory(tmp);
-			}
+			FileChooserManager.applyInitialDirectory(fileChooser, "SaveFileDir");
 		}
 
 		var selectedFile = fileChooser.showSaveDialog(window.getStage());
 
 		if (selectedFile != null) {
 			Save.apply(selectedFile, window);
-			ProgramProperties.put("SaveFileDir", selectedFile.getParent());
+			FileChooserManager.rememberDirectory(selectedFile, "SaveFileDir");
 			RecentFilesManager.getInstance().insertRecentFile(selectedFile.getPath());
 			window.fileNameProperty().set(selectedFile.getPath());
 			RecentFilesManager.getInstance().insertRecentFile(window.getFileName());
